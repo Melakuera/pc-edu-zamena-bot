@@ -1,0 +1,17 @@
+telegram:
+  api-url: https://api.telegram.org/
+  bot-name: ${BOT_NAME}
+  bot-token: ${BOT_TOKEN}
+  webhook-path: ${WEBHOOK_PATH}
+  example-gif-url: ${EXAMPLE_GIF_URL}
+  bot-username: ${BOT_USERNAME}
+  
+server:
+  port: ${SERVER_PORT}
+  
+spring:
+  data:
+    mongodb:
+      uri: ${MONGODB_URI}
+#      username: ${MONGODB_USER}
+#      password: ${MONGODB_PASSWORD}
