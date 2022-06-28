@@ -67,9 +67,7 @@ public class InlineQueryHandler {
 
 		String[] facultyTypeRusNames = getFacultyTypeRusNames();
 
-		boolean result = Arrays.stream(facultyTypeRusNames).anyMatch(facultyRusName::equals);
-		
-		return result ? true : false;
+		return Arrays.stream(facultyTypeRusNames).anyMatch(facultyRusName::equals);
 	}
 
 	public List<InlineQueryResultArticle> getInlineQueryResultsByFaculty(String facultyRusName) {
@@ -157,23 +155,6 @@ public class InlineQueryHandler {
 				}
 		}
 		return results;
-	}
-
-	public boolean isValidQuery(String query) {
-
-		int currentYear = LocalDate.now().getYear();
-
-		// Например ПКС 3-21
-		String[] facultyTypeRusNames = getFacultyTypeRusNames();
-		String facultyRusName = query.split(" ")[0]; // ПКС
-		int courseYear = Integer.parseInt(query.split(" ")[0].split("-")[0]); // 3
-		int inputYear = Integer.parseInt(query.split(" ")[0].split("-")[1]); // 21
-
-		if (Arrays.stream(facultyTypeRusNames).anyMatch(facultyRusName::equals) && (courseYear > 0 && courseYear <= 3)
-				&& (inputYear > courseYear - 3 && inputYear <= currentYear)) {
-			return true;
-		}
-		return false;
 	}
 
 	private String[] getFacultyTypeRusNames() {

@@ -28,7 +28,7 @@ public class DbTelegramChatService {
 			throw new IllegalArgumentException(
 					String.format("Чат с id %s не существует", chatId));
 		});
-		List<String> subscribedUsers = actualChat.getSubscribedUsers();
+		List<String> subscribedUsers = actualChat.getSubscribedUsersId();
 		boolean isContains = subscribedUsers.contains(userId);
 		
 		if (isContains) {
@@ -40,13 +40,21 @@ public class DbTelegramChatService {
 		telegramChatRepo.save(actualChat);
 	}
 	
+	public String getRecentPinnedMessageId(String chatId) {
+		var actualChat = telegramChatRepo.findById(chatId).orElseThrow(() -> {
+			throw new IllegalArgumentException(
+					String.format("Чат с id %s не существует", chatId));
+		});
+		return actualChat.getRecentPinnedMessageText();
+	}
+	
 	public void removeUserByChat(String chatId, String userId) {
 		
 		var actualChat = telegramChatRepo.findById(chatId).orElseThrow(() -> {
 			throw new IllegalArgumentException(
 					String.format("Чат с id %s не существует", chatId));
 		});
-		List<String> subscribedUsers = actualChat.getSubscribedUsers();
+		List<String> subscribedUsers = actualChat.getSubscribedUsersId();
 		boolean isContains = subscribedUsers.contains(userId);
 		
 		if (!isContains) {
@@ -88,5 +96,18 @@ public class DbTelegramChatService {
 		telegramChatRepo.deleteById(chatId);
 		
 		return true;
+	}
+	
+	public List<TelegramChat> findAll() {
+		return telegramChatRepo.findAll();
+	}
+	
+	public void updateRecentPinnedMessageText(String chatId, String text) {
+		var chat = telegramChatRepo.findById(chatId).orElseThrow(() -> {
+			throw new IllegalArgumentException(
+					String.format("Чат с id %s не существует", chatId));
+		});
+		chat.setRecentPinnedMessageText(text);
+		telegramChatRepo.save(chat);
 	}
 }

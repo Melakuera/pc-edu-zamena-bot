@@ -2,7 +2,11 @@ package io.melakuera.tgbotzamena.services;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
@@ -10,6 +14,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 
+import io.melakuera.tgbotzamena.enums.FacultyType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,16 +32,16 @@ public class PdfDocumentHandler {
 	private PDDocument pdfDoc;
 	private Resource pdfResource;
 
-	private final String KEY_WORD = "замена";
-	private final String KEY_GROUP = "ПКС 3-21";
+	private final String keyWord = "ЗАМЕНА";
+	private final List<String> keysGroup = getFacultyTypeRusNames();
 
 	/*
 	 *  Возвращает замену по заданной группе
 	 */
-	public List<String> getZamenaDataByGroup() {
+	public Map<String, List<String>> getZamenaDataByGroup() throws IllegalAccessException {
 
 		String pdfDocLink = webSiteParser.getZamenaPdfDocumentLink();
-		List<String> zamenaData = new ArrayList<>();
+		Map<String, List<String>> zamenaData = new HashMap<>();
 		
 		try {
 			pdfStripper = new PDFTextStripper();
@@ -44,24 +49,32 @@ public class PdfDocumentHandler {
 
 			pdfDoc = PDDocument.load(pdfResource.getInputStream());
 
-			String[] texts = pdfStripper.getText(pdfDoc).split("\n");
+			String[] pdfTexts = pdfStripper.getText(pdfDoc).split("\n");
 
-			for (int i = 0; i < texts.length; i++) {				
-				String tempText = texts[i].strip();
-				if (tempText.contains(KEY_WORD.toUpperCase()) || tempText.contains(KEY_WORD)) {
-					zamenaData.add(tempText);
+			for (int i = 0; i < pdfTexts.length; i++) {
+				
+				String text = pdfTexts[i].strip();
+				
+				// Например: ЗАМЕНА НА ПЯТНИЦУ – 24 ИЮНЯ (ЧИСЛИТЕЛЬ) 2022г
+				if (text.contains(keyWord.toLowerCase()) || text.contains(keyWord)) {
+					zamenaData.put("head", List.of(text));
 				}
-				if (tempText.contains(KEY_GROUP)) {
-					String group = tempText.substring(0, 8);
-					String classInfo = tempText.substring(9, tempText.length());
-					zamenaData.add(group);
-					zamenaData.add(classInfo);
+				
+				// КС 1-21 4п Адабият Каримова Э.М. 37
+				if (keysGroup.contains(text.split(" ")[0])) {
+					
+					String groupName = text.substring(0, 8).replaceFirst(" ", "");
+					String classInfo = text.substring(9, text.length()).strip();
+					List<String> groupZamena = new ArrayList<>();
+					
+					groupZamena.add(classInfo);
 					i++;
 					
-					while (i < texts.length && texts[i].strip().matches("^\\d.+")) {
-						zamenaData.add(texts[i].strip());
+					while (i < pdfTexts.length && pdfTexts[i].strip().matches("^\\d.+")) {
+						groupZamena.add(pdfTexts[i].strip());
 						i++;
 					}
+					zamenaData.put(groupName, groupZamena);
 				}
 			}
 			pdfDoc.close();
@@ -69,9 +82,16 @@ public class PdfDocumentHandler {
 			log.warn("Что-то пошло не так: {}", e.getMessage());
 		}
 		if (zamenaData.size() <= 1) {
-			return null;
+			return Collections.emptyMap();
 		}
 		return zamenaData;
-
 	}
+	
+	private List<String> getFacultyTypeRusNames() {
+
+		return Arrays.stream(FacultyType.values())
+				.map(FacultyType::getRusName).toList();
+	}
+	
+	
 }

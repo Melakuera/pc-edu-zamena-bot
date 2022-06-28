@@ -24,11 +24,17 @@ public class TelegramChat {
 	@NonNull
 	private String target;
 	
-	private List<String> subscribedUsers = new ArrayList<>();
+	@Field("recent_pinned_message_text")
+	private String recentPinnedMessageText;
+	
+	@Field("subscribed_users_id")
+	private List<String> subscribedUsersId;
 
 	public TelegramChat(String telegramChatId, String target) {
 		super();
 		this.telegramChatId = telegramChatId;
 		this.target = target;
+		this.recentPinnedMessageText = "";
+		this.subscribedUsersId = new ArrayList<>();
 	}
 }

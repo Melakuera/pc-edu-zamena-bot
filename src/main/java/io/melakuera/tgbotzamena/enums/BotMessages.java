@@ -50,7 +50,7 @@ public enum BotMessages {
 			
 			В: Я нашел ошибку! Я хочу дополнить функционал бота!
 			
-			О: Тогда смело в гитхаб: 
+			О: Тогда смело в гитхаб:  https://github.com/slappidyslap/pc-edu-zamena-bot
 					
 		"""),
 	

@@ -2,15 +2,24 @@ package io.melakuera.tgbotzamena.services;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
+import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMember;
+import org.telegram.telegrambots.meta.api.methods.pinnedmessages.PinChatMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import io.melakuera.tgbotzamena.db.DbTelegramChatService;
+import io.melakuera.tgbotzamena.db.TelegramChat;
 import io.melakuera.tgbotzamena.enums.BotMessages;
 import io.melakuera.tgbotzamena.telegram.ZamenaPinnerBot;
 import lombok.RequiredArgsConstructor;
@@ -35,16 +44,105 @@ public class MessageHandler {
 	@Value("${telegram.example-gif-url}")
 	private String botExampleGifUrl;
 	
-	@Async
-	// @Scheduled(cron = "0 08-15 23 * * *")
+	@SneakyThrows
+	@Scheduled(cron = "0 04 23 * * *")
 	public void getCurrentZamena() throws IOException {
 		
 		log.info("Executing getCurrentZamena()...");
 		
-		List<String> data = documentHandler.getZamenaDataByGroup();
+		Map<String, List<String>> zamenaData;
+		try {
+			zamenaData = documentHandler.getZamenaDataByGroup();
+		} catch (IllegalAccessException e) {
+			log.warn("Что-то пошло не так: {}", e.getMessage());
+			return;
+		}
 		
+		if (!zamenaData.isEmpty()) {
 		
+			List<TelegramChat> chats = dbTelegramChatService.findAll();
+			
+			// dsfasdfsdf
+			for (TelegramChat chat : chats) {
+				
+				String chatId = chat.getTelegramChatId();
+				String target = chat.getTarget();
+				String actualRecentPinnedMessageText = chat.getRecentPinnedMessageText();
+				
+				List<String> groupZamena = zamenaData.get(target);
+				
+				if (groupZamena == null) continue;
+				
+				int actualRecentPinnedMessageDayOfMonth = 
+						getDayOfMonthByHeadText(actualRecentPinnedMessageText);
+				int zamenaMessageDayOfMonth = 
+						getDayOfMonthByHeadText(zamenaData.get("head").toString());
+				
+				if (actualRecentPinnedMessageDayOfMonth == -1) {
+					log.warn("Тут почему то просочился сообщение не замена: {}", 
+							actualRecentPinnedMessageText);
+				}
+				if (actualRecentPinnedMessageDayOfMonth != zamenaMessageDayOfMonth) {
+					
+					StringBuilder groupZamenaResult = new StringBuilder();
+					for (String zamena : groupZamena) {
+						groupZamenaResult.append(zamena + "\n");
+					}
+					
+					String headText = zamenaData.get("head").toString();
+					String headTextResult = headText
+							.substring(1, headText.length() - 1) + "\n";
+					
+					String result = (headTextResult + groupZamenaResult).strip();
+					
+					var messageZamenaData = SendMessage.builder()
+							.text(result)
+							.chatId(chatId)
+							.build();	
+					Message sendedMessage = bot.execute(messageZamenaData);
+					
+					var pinChatMessage = PinChatMessage.builder()
+							.chatId(chatId)
+							.messageId(sendedMessage.getMessageId())
+							.build();
+					
+					bot.execute(pinChatMessage);
+					
+					dbTelegramChatService
+						.updateRecentPinnedMessageText(chatId, headTextResult);
+					
+					mentionUsers(chatId, chat.getSubscribedUsersId());
+				}
+			}
+		}
+	}
+	
+	@SneakyThrows
+	public void mentionUsers(String chatId, List<String> subscribedUsersId) {
 		
+		StringBuilder sb = new StringBuilder();
+		
+		subscribedUsersId.forEach(userId -> {
+			try {
+				ChatMember chatMember = bot.execute(GetChatMember.builder()
+						.chatId(chatId)
+						.userId(Long.parseLong(userId))
+						.build());
+				String chatMemberFirstName = chatMember.getUser().getFirstName();
+				
+				sb.append(String.format(
+						"[%s](tg://user?id=%s)", chatMemberFirstName, userId));
+				
+				bot.execute(SendMessage.builder()
+						.text(sb.toString())
+						.chatId(chatId)
+						.parseMode("Markdown")
+						.build());
+				
+			} catch (NumberFormatException | TelegramApiException e) {
+				e.printStackTrace();
+			}
+		});
 	}
 
 	@SneakyThrows
@@ -155,5 +253,17 @@ public class MessageHandler {
 					.build();	
 		}
 		return null;
+	}
+	
+	public int getDayOfMonthByHeadText(String headText) {
+		
+		Pattern patter = Pattern.compile("\\d{2}");
+		Matcher matcher = patter.matcher(headText);
+		int dayOfMonth = -1;
+		if (matcher.find()) {
+		    String t = headText.substring(matcher.start(), matcher.end());
+		    dayOfMonth = Integer.parseInt(t);
+		}
+		return dayOfMonth;
 	}
 }

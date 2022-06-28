@@ -24,14 +24,14 @@ public class WebSiteParser {
 	/*
 	 * Возвращает ссылку на pdf документ
 	 */
-	public String getZamenaPdfDocumentLink() {
+	public String getZamenaPdfDocumentLink() throws IllegalAccessException {
 
 		Document doc = null;
 		try {
 			doc = Jsoup.connect(ROOT_URL).get();		
 		} catch (IOException e) {
 			log.warn("Что-то пошло не так: {}", e.getMessage());
-			return "";
+			throw new IllegalAccessException();
 		}
 		Element tagA = doc.select(CSS_SELECTOR_TAG_A).first();
 		String hrefAttrValue = tagA.attr("href");
