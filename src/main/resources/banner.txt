@@ -1,0 +1,10 @@
+${AnsiColor.RED}ooooooooo.     .oooooo.         oooooooooooo oooooooooo.   ooooo     ooo       oooo    oooo   .oooooo.    
+${AnsiColor.RED}`888   `Y88.  d8P'  `Y8b        `888'     `8 `888'   `Y8b  `888'     `8'       `888   .8P'   d8P'  `Y8b   
+${AnsiColor.RED} 888   .d88' 888                 888          888      888  888       8         888  d8'    888           
+${AnsiColor.RED} 888ooo88P'  888                 888oooo8     888      888  888       8         88888[      888           
+${AnsiColor.RED} 888         888                 888    "     888      888  888       8         888`88b.    888     ooooo 
+${AnsiColor.RED} 888         `88b    ooo         888       o  888     d88'  `88.    .8'         888  `88b.  `88.    .88'  
+${AnsiColor.RED}o888o         `Y8bood8P'        o888ooooood8 o888bood8P'      `YbodP'          o888o  o888o  `Y8bood8P'   
+                                                                                                   
+${AnsiColor.BRIGHT_BLUE}${application.name} ${application.version}V
+${AnsiColor.GREEN}Powered by Spring Boot ${spring-boot.version}

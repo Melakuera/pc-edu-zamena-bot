@@ -9,6 +9,10 @@ import io.melakuera.tgbotzamena.db.DbTelegramChatService;
 import io.melakuera.tgbotzamena.enums.BotMessages;
 import lombok.RequiredArgsConstructor;
 
+/*
+ * Обработчик колбэк запросов
+ * (https://core.telegram.org/bots/api#callbackquery)
+ */
 @Service
 @RequiredArgsConstructor
 public class CallbackQueryHandler {
@@ -23,7 +27,7 @@ public class CallbackQueryHandler {
 		
 		if (query.matches("quit_yes")) {
 			
-			boolean result = dbTelegramChatService.ifChatExistsDeleteChat(chatId);
+			boolean result = dbTelegramChatService.deleteChat(chatId);
 			
 			if (!result) {
 				

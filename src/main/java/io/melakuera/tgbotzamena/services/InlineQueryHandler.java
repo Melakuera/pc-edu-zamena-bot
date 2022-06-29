@@ -2,7 +2,7 @@ package io.melakuera.tgbotzamena.services;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -11,10 +11,8 @@ import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.objects.inlinequery.InlineQuery;
 import org.telegram.telegrambots.meta.api.objects.inlinequery.inputmessagecontent.InputTextMessageContent;
 import org.telegram.telegrambots.meta.api.objects.inlinequery.result.InlineQueryResultArticle;
-import org.telegram.telegrambots.meta.api.objects.inlinequery.result.InlineQueryResultGif;
 
 import io.melakuera.tgbotzamena.enums.BotMessages;
-import io.melakuera.tgbotzamena.enums.FacultyType;
 import lombok.RequiredArgsConstructor;
 
 /*
@@ -28,143 +26,121 @@ public class InlineQueryHandler {
 	public BotApiMethod<?> handleInlineQuery(InlineQuery inlineQuery) {
 
 		String query = inlineQuery.getQuery();
-		boolean result = isValidFaculty(query);
-		AnswerInlineQuery answerInlineQuery;
-
-		if (result) {
-
-			List<InlineQueryResultArticle> articles = getInlineQueryResultsByFaculty(query);
-
-			answerInlineQuery = AnswerInlineQuery.builder()
-					.inlineQueryId(inlineQuery.getId())
-					.results(articles)
-					.build();
-
-			return answerInlineQuery;
-		}
-
-		InlineQueryResultGif gif = InlineQueryResultGif.builder()
-				.id("null")
-				.title("Не найдено")
-				.gifUrl("https://otvet.imgsmail.ru/download/19204353_9a643b738d79f7f9b7f8e3e776c509f3_800.gif")
-				.build();
 		
-//		InlineQueryResultArticle article = InlineQueryResultArticle.builder()
-//				.title("Не найдено")
-//				.id("null")
-//				.inputMessageContent(InputTextMessageContent.builder()
-//						.messageText("Повторите попытку")
-//						.build())
-//				.build();
-		
+		List<InlineQueryResultArticle> articles = 
+				getInlineQueryResultsByFaculty(query);
+
 		return AnswerInlineQuery.builder()
 				.inlineQueryId(inlineQuery.getId())
-				.result(gif)
+				.results(articles)
 				.build();
 	}
 
-	private boolean isValidFaculty(String facultyRusName) {
+	public List<InlineQueryResultArticle> getInlineQueryResultsByFaculty(
+			String facultyRusName) {
 
-		String[] facultyTypeRusNames = getFacultyTypeRusNames();
-
-		return Arrays.stream(facultyTypeRusNames).anyMatch(facultyRusName::equals);
+		switch (facultyRusName) {
+			case "ЭкСС", "СССК": return getInlineQueryResultsByEKSSOrSSSK(facultyRusName);
+			case "ЭССС": return getInlineQueryResultsByESSS(facultyRusName);
+			case "ПКС", "КС": return getInlineQueryResultsByPKSOrKS(facultyRusName);
+			default: return Collections.emptyList();
+		}
 	}
-
-	public List<InlineQueryResultArticle> getInlineQueryResultsByFaculty(String facultyRusName) {
-
+	
+	private List<InlineQueryResultArticle> getInlineQueryResultsByEKSSOrSSSK(
+			String facultyRusName) {
+		
 		int currentYear = LocalDate.now().getYear() % 100;
-		List<InlineQueryResultArticle> results = new ArrayList<>();
+		List<InlineQueryResultArticle> result = new ArrayList<>();
+		
+		for (int i = 1; i <= 3; i++) {
 
-		if (facultyRusName.equals(FacultyType.EKSS.getRusName())
-				|| facultyRusName.equals(FacultyType.SSSK.getRusName())) {
+			String text = facultyRusName + " 1" + "-" + (currentYear - i);
 
-			for (int i = 1; i <= 3; i++) {
+			InputTextMessageContent inputContent = InputTextMessageContent.builder()
+					.messageText(
+							BotMessages.SUCCESS_APPLY_FACULTY.getMessage() + " " + text)
+					.build();
 
-				String text = facultyRusName + " 1" + "-" + (currentYear - i);
+			InlineQueryResultArticle article = InlineQueryResultArticle.builder()
+					.title(text)
+					.id(text)
+					.inputMessageContent(inputContent)
+					.build();
 
-				InputTextMessageContent inputContent = InputTextMessageContent.builder()
-						.messageText(
-								BotMessages.SUCCESS_APPLY_FACULTY.getMessage() + " " + text)
-						.build();
-
-				InlineQueryResultArticle article = InlineQueryResultArticle.builder()
-						.title(text)
-						.id(text)
-						.inputMessageContent(inputContent)
-						.build();
-
-				results.add(article);
-			}
-		} else if (facultyRusName.equals(FacultyType.ESSS.getRusName())) {
-
-			for (int i = 1; i <= 3; i++)
-				for (int j = 1; j <= 4; j++) {
-
-					String text = facultyRusName + " " + j + "-" + (currentYear - i);
-
-					InputTextMessageContent inputContent = InputTextMessageContent.builder()
-							.messageText(
-									BotMessages.SUCCESS_APPLY_FACULTY.getMessage() + " " + text)
-							.build();
-
-					InlineQueryResultArticle article = InlineQueryResultArticle.builder()
-							.title(text)
-							.id(text)
-							.inputMessageContent(inputContent)
-							.build();
-
-					results.add(article);
-				}
-		} else if (facultyRusName.equals(FacultyType.PKS.getRusName())
-				|| facultyRusName.equals(FacultyType.KS.getRusName())) {
-
-			for (int i = 1; i <= 3; i++) {
-
-				String text = facultyRusName + " " + i + "-" + (currentYear - 1) ;
-
-				InputTextMessageContent inputContent = InputTextMessageContent.builder()
-						.messageText(
-								BotMessages.SUCCESS_APPLY_FACULTY.getMessage() + " " + text)
-						.build();
-
-				InlineQueryResultArticle article = InlineQueryResultArticle.builder()
-						.title(text)
-						.id(text)
-						.inputMessageContent(inputContent)
-						.build();
-
-				results.add(article);
-			}
-			
-			for (int i = 2; i <= 3; i++)
-				for (int j = 1; j <= 2; j++) {
-					String text = facultyRusName + " " + j + "-" + (currentYear - i);
-	
-					InputTextMessageContent inputContent = InputTextMessageContent.builder()
-							.messageText(
-									BotMessages.SUCCESS_APPLY_FACULTY.getMessage() + " " + text)
-							.build();
-	
-					InlineQueryResultArticle article = InlineQueryResultArticle.builder()
-							.title(text)
-							.id(text)
-							.inputMessageContent(inputContent)
-							.build();
-	
-					results.add(article);
-				}
+			result.add(article);
 		}
-		return results;
+		return result;
 	}
+	
+	private List<InlineQueryResultArticle> getInlineQueryResultsByESSS(
+			String facultyRusName)  {
+		
+		int currentYear = LocalDate.now().getYear() % 100;
+		List<InlineQueryResultArticle> result = new ArrayList<>();
+		
+		for (int i = 1; i <= 3; i++)
+			for (int j = 1; j <= 4; j++) {
 
-	private String[] getFacultyTypeRusNames() {
+				String text = facultyRusName + " " + j + "-" + (currentYear - i);
 
-		FacultyType[] facultyTypes = FacultyType.values();
-		String[] facultyTypeNames = new String[facultyTypes.length];
+				InputTextMessageContent inputContent = InputTextMessageContent.builder()
+						.messageText(
+								BotMessages.SUCCESS_APPLY_FACULTY.getMessage() + " " + text)
+						.build();
 
-		for (int i = 0; i < facultyTypes.length; i++) {
-			facultyTypeNames[i] = facultyTypes[i].getRusName();
+				InlineQueryResultArticle article = InlineQueryResultArticle.builder()
+						.title(text)
+						.id(text)
+						.inputMessageContent(inputContent)
+						.build();
+
+				result.add(article);
+			}
+		return result;
+	}
+	
+	private List<InlineQueryResultArticle> getInlineQueryResultsByPKSOrKS(
+			String facultyRusName) {
+		
+		int currentYear = LocalDate.now().getYear() % 100;
+		List<InlineQueryResultArticle> result = new ArrayList<>();
+		
+		for (int i = 1; i <= 3; i++) {
+
+			String text = facultyRusName + " " + i + "-" + (currentYear - 1) ;
+
+			InputTextMessageContent inputContent = InputTextMessageContent.builder()
+					.messageText(
+							BotMessages.SUCCESS_APPLY_FACULTY.getMessage() + " " + text)
+					.build();
+
+			InlineQueryResultArticle article = InlineQueryResultArticle.builder()
+					.title(text)
+					.id(text)
+					.inputMessageContent(inputContent)
+					.build();
+
+			result.add(article);
 		}
-		return facultyTypeNames;
+		
+		for (int i = 2; i <= 3; i++)
+			for (int j = 1; j <= 2; j++) {
+				String text = facultyRusName + " " + j + "-" + (currentYear - i);
+
+				InputTextMessageContent inputContent = InputTextMessageContent.builder()
+						.messageText(
+								BotMessages.SUCCESS_APPLY_FACULTY.getMessage() + " " + text)
+						.build();
+
+				InlineQueryResultArticle article = InlineQueryResultArticle.builder()
+						.title(text)
+						.id(text)
+						.inputMessageContent(inputContent)
+						.build();
+
+				result.add(article);
+			}
+		return result;
 	}
 }
