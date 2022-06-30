@@ -65,7 +65,7 @@ public class DbTelegramChatService {
 		});
 		List<String> subscribedUsers = actualChat.getSubscribedUsersId();
 		
-		if (subscribedUsers.contains(userId)) {
+		if (!subscribedUsers.contains(userId)) {
 			return false;
 		}
 		subscribedUsers.removeIf(userId::equals);
