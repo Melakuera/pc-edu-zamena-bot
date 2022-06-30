@@ -3,6 +3,7 @@ package io.melakuera.tgbotzamena.services;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
+import org.telegram.telegrambots.meta.api.methods.send.SendAnimation;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
@@ -21,6 +22,7 @@ public class MessageHandler {
 
 	private final DbTelegramChatService dbTelegramChatService;
 	private final InlineKeyboardMaker inlineKeyboardMaker;
+	private final GifHandler gifHandler;
 	
 	private static final String MARKDOWN = "Markdown";
 	private static final String REGEX = 
@@ -28,8 +30,7 @@ public class MessageHandler {
 	
 	@Value("${telegram.bot-username}")
 	private String botUsername;
-	@Value("${telegram.example-gif-url}")
-	private String botExampleGifUrl;
+
 
 	public BotApiMethod<?> handleMessage(Message message) {
 		
@@ -37,21 +38,13 @@ public class MessageHandler {
 		String messageText = message.getText();
 		
 		if (messageText.matches("/start.*")) {
-//			var gif = new UrlResource(botExampleGifUrl).getInputStream();
-//			var inputFile = new InputFile(gif, "gif");
-//			return SendVideo.builder()
-//				.video(inputFile)
-//				.caption(String.format(
-//							BotMessages.START_IN_GROUP.getMessage(), botExampleGifUrl))
-//				.parseMode(MARKDOWN)
-//				.chatId(chatId)
-//				.build();
-			return SendMessage.builder()
-					.text(String.format(
-							BotMessages.START_IN_GROUP.getMessage(), botExampleGifUrl))
-					.parseMode(MARKDOWN)
-					.chatId(chatId)
-					.build();	
+			
+			var sendAnimBuilder = SendAnimation.builder()
+				.caption(String.format(
+							BotMessages.START_IN_GROUP.getMessage()))
+				.parseMode(MARKDOWN);
+			
+			gifHandler.sendExampleGif(chatId, sendAnimBuilder);
 		}
 		
 		// При выборе группы из колледжка 
@@ -64,9 +57,10 @@ public class MessageHandler {
 			
 			// если таковой чат существует
 			if (isChatExists) {
-				
-				log.info("Чат с id {} поменял группу, замен которых получает на {}", 
+
+				log.info("Чат с id {} поменял группу на {}", 
 						chatId, target);
+				
 				return SendMessage.builder()
 						.text(String.format(
 								BotMessages.CONGRATULATION_IF_EXISTS.getMessage(), target))
@@ -90,15 +84,16 @@ public class MessageHandler {
 			String target = dbTelegramChatService.getTarget(chatId);
 			
 			target = target.isBlank() ? 
-					"не подписаны ни на одну группу" : "подписаны на" + target;
+					"не подписаны ни на одну группу" : "подписаны на " + target;
 			
 			return SendMessage.builder()
 					.text(String.format(
 							BotMessages.INFO.getMessage(), 
-								target, botUsername, botExampleGifUrl))
+							target, botUsername.replace("_", "\\_")))
 					.parseMode(MARKDOWN)
 					.chatId(chatId)
-					.build();	
+					.build();
+				
 		}
 		else if (messageText.matches("/in.*")) {
 			
@@ -160,8 +155,7 @@ public class MessageHandler {
 			log.info("Чат с id {} отписался от замен", chatId);
 			
 			return SendMessage.builder()
-					.text(String.format(
-							BotMessages.QUIT.getMessage(), botExampleGifUrl))
+					.text(BotMessages.QUIT.getMessage())
 					.chatId(chatId)
 					.replyMarkup(inlineKeyboardMarkup)
 					.build();	

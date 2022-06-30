@@ -7,7 +7,7 @@ telegram:
   bot-name: ${BOT_NAME}
   bot-token: ${BOT_TOKEN}
   webhook-path: ${WEBHOOK_PATH}
-  example-gif-url: ${EXAMPLE_GIF_URL}
+  example-gif-file-id: ${EXAMPLE_GIF_FILE_ID}
   bot-username: ${BOT_USERNAME}
   
 cron:

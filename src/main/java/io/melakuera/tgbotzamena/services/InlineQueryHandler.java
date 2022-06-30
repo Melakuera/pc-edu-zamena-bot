@@ -1,6 +1,9 @@
 package io.melakuera.tgbotzamena.services;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -103,9 +106,12 @@ public class InlineQueryHandler {
 	private List<InlineQueryResultArticle> getInlineQueryResultsByPKSOrKS(
 			String facultyRusName) {
 		
-		int currentYear = LocalDate.now().getYear() % 100;
+		Clock newClock = Clock.fixed(
+				Instant.parse("2022-11-22T10:15:30.00Z"), ZoneId.systemDefault());
+		int currentMonth = LocalDate.now(newClock).getMonthValue();
+		int currentYear = LocalDate.now(newClock).getYear() % 100;
 		List<InlineQueryResultArticle> result = new ArrayList<>();
-		
+//		если нын. месяц года позже сентября, то надо: 22 - 21 - 20, иначе: 21 - 20 - 19
 		for (int i = 1; i <= 3; i++) {
 
 			String text = facultyRusName + " " + i + "-" + (currentYear - 1) ;
