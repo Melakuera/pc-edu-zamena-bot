@@ -21,7 +21,6 @@ public class TelegramChat {
 	// Id группы достающийся через API Telegram bot
 	@Id
 	@NonNull
-	@Field("telegram_chat_id")
 	private String telegramChatId;
 	
 	// Группа из колледжа на которую они подписаны

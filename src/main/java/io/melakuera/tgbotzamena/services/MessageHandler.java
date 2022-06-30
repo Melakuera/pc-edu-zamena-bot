@@ -22,7 +22,6 @@ public class MessageHandler {
 	private final DbTelegramChatService dbTelegramChatService;
 	private final InlineKeyboardMaker inlineKeyboardMaker;
 	
-	private static final String CHAT_NOT_EXISTS = "Чат с id %s не существует";
 	private static final String MARKDOWN = "Markdown";
 	private static final String REGEX = 
 			"Выбрана группа:\\s[ЭкСС|СССК|ЭССС|КС|ПКС]{2,4}\\s[1-3]-\\d{2}";
@@ -37,14 +36,16 @@ public class MessageHandler {
 		String chatId = message.getChatId().toString();
 		String messageText = message.getText();
 		
-		if (messageText.matches("/start")) {
-			return SendMessage.builder()
-					.text(BotMessages.START.getMessage())
-					.chatId(chatId)
-					.build();
-		}
-		else if (messageText.matches("/start".concat(botUsername))) {
-			
+		if (messageText.matches("/start.*")) {
+//			var gif = new UrlResource(botExampleGifUrl).getInputStream();
+//			var inputFile = new InputFile(gif, "gif");
+//			return SendVideo.builder()
+//				.video(inputFile)
+//				.caption(String.format(
+//							BotMessages.START_IN_GROUP.getMessage(), botExampleGifUrl))
+//				.parseMode(MARKDOWN)
+//				.chatId(chatId)
+//				.build();
 			return SendMessage.builder()
 					.text(String.format(
 							BotMessages.START_IN_GROUP.getMessage(), botExampleGifUrl))
@@ -63,6 +64,9 @@ public class MessageHandler {
 			
 			// если таковой чат существует
 			if (isChatExists) {
+				
+				log.info("Чат с id {} поменял группу, замен которых получает на {}", 
+						chatId, target);
 				return SendMessage.builder()
 						.text(String.format(
 								BotMessages.CONGRATULATION_IF_EXISTS.getMessage(), target))
@@ -73,26 +77,45 @@ public class MessageHandler {
 			
 			dbTelegramChatService.insertChat(chatId, target);
 			
+			log.info("Чат с id {} подписался на группу {}", chatId, target);
+			
 			return SendMessage.builder()
 					.text(String.format(BotMessages.CONGRATULATION.getMessage(), target))
 					.chatId(chatId)
 					.parseMode(MARKDOWN)
 					.build();
 		}
-		else if (messageText.matches("/in".concat(botUsername))) {
+		else if (messageText.matches("/info.*")) {
+			
+			String target = dbTelegramChatService.getTarget(chatId);
+			
+			target = target.isBlank() ? 
+					"не подписаны ни на одну группу" : "подписаны на" + target;
+			
+			return SendMessage.builder()
+					.text(String.format(
+							BotMessages.INFO.getMessage(), 
+								target, botUsername, botExampleGifUrl))
+					.parseMode(MARKDOWN)
+					.chatId(chatId)
+					.build();	
+		}
+		else if (messageText.matches("/in.*")) {
 			
 			String userId = message.getFrom().getId().toString();
 			
-			boolean didUserAddToChat;
+			boolean isUserAddedToChat;
 			try {
-				didUserAddToChat = dbTelegramChatService.addUserToChat(chatId, userId);
+				isUserAddedToChat = dbTelegramChatService.addUserToChat(chatId, userId);
 			} catch (Exception e) {
-				log.warn(CHAT_NOT_EXISTS, chatId);
-				return null;
+				return SendMessage.builder()
+						.text(BotMessages.GROUP_NOT_APPLY_ERROR.getMessage())
+						.chatId(chatId)
+						.build();
 			}
 			
 			// Если юзер уже присутствует в списке
-			if (!didUserAddToChat)
+			if (!isUserAddedToChat)
 				return SendMessage.builder()
 						.text(BotMessages.MENTION_ERROR.getMessage())
 						.chatId(chatId)
@@ -104,20 +127,22 @@ public class MessageHandler {
 					.build();
 		}
 		
-		else if (messageText.matches("/out".concat(botUsername))) {
+		else if (messageText.matches("/out.*")) {
 			
 			String userId = message.getFrom().getId().toString();
 			
-			boolean didUserRemoveFromChat;
+			boolean isUserRemovedFromChat;
 			try {
-				didUserRemoveFromChat = dbTelegramChatService.removeUserFromChat(chatId, userId);
+				isUserRemovedFromChat = dbTelegramChatService.removeUserFromChat(chatId, userId);
 			} catch (Exception e) {
-				log.warn(CHAT_NOT_EXISTS, chatId);
-				return null;
+				return SendMessage.builder()
+						.text(BotMessages.GROUP_NOT_APPLY_ERROR.getMessage())
+						.chatId(chatId)
+						.build();
 			}
 			
 			// Если юзер отсутствует в списке
-			if (!didUserRemoveFromChat)
+			if (!isUserRemovedFromChat)
 				return SendMessage.builder()
 						.text(BotMessages.MENTION_ERROR.getMessage())
 						.chatId(chatId)
@@ -128,27 +153,11 @@ public class MessageHandler {
 					.chatId(chatId)
 					.build();
 		}
-		else if (messageText.matches("/info".concat(botUsername)) ||
-					messageText.matches("/info")) {
-			
-			String target;
-			try {
-				target = "на" + dbTelegramChatService.getTarget(chatId);
-			} catch (Exception e) {
-				log.warn(CHAT_NOT_EXISTS, chatId);
-				target = "ни на одну группу";
-			}
-			return SendMessage.builder()
-					.text(String.format(
-							BotMessages.INFO.getMessage(), 
-								target, botUsername, botExampleGifUrl))
-					.parseMode(MARKDOWN)
-					.chatId(chatId)
-					.build();	
-		}
-		else if (messageText.matches("/quit".concat(botUsername))) {
+		else if (messageText.matches("/quit.*")) {
 			
 			var inlineKeyboardMarkup = inlineKeyboardMaker.getInlineKeyboardMarkup();
+			
+			log.info("Чат с id {} отписался от замен", chatId);
 			
 			return SendMessage.builder()
 					.text(String.format(

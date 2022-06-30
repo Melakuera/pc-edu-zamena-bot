@@ -24,15 +24,20 @@ public class WebSiteParser {
 	//Возвращает ссылку на pdf документ
 	public String getZamenaPdfDocumentLink() throws IllegalAccessException {
 
+		log.info("Парсер веб-сайта начал свою работу...");
+		
 		Document doc = null;
 		try {
 			doc = Jsoup.connect(ROOT_URL).get();		
 		} catch (IOException e) {
-			log.error("Что-то критическое произошло: {}", e.getMessage());
+			log.error("Что-то произошло критическое: {}", e.getMessage());
 			throw new IllegalAccessException(e.getMessage());
 		}
 		Element tagA = doc.select(CSS_SELECTOR_TAG_A).first();
 		String hrefAttrValue = tagA.attr("href");
+		
+		log.info("Парсер веб-сайта завершил свою работу. "
+				+ "Ссылка на pdf документ: {}", hrefAttrValue);
 		
 		return "https://pc.edu.kg/" + hrefAttrValue;
 	}

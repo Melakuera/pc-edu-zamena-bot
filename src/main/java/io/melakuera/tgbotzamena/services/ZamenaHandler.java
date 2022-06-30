@@ -1,5 +1,6 @@
 package io.melakuera.tgbotzamena.services;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -30,19 +31,20 @@ public class ZamenaHandler {
 	private final DbTelegramChatService dbTelegramChatService;
 	
 	private static final String MARKDOWN = "Markdown";
-	private static final String GET_ERROR = "Что-то критическое произошло: {}";
-	private static final String CHAT_NOT_EXISTS = "Чат с id %s не существует";
+	private static final String GET_ERROR = "Что-то произошло критическое: {}";
 	
-	@Scheduled(cron = "0 52 22 * * *")
+	@Scheduled(cron = "${cron.expression}")
 	public void getCurrentZamena() {
 		
-		log.info("Executing getCurrentZamena()...");
+		log.info("Обработчик замен начал свою работу...");
 		
 		Map<String, List<String>> zamenaData;
 		try {
 			zamenaData = documentHandler.getZamenaDataByGroup();
 		} catch (IllegalAccessException e) {
 			log.error(GET_ERROR, e.getMessage());
+			Arrays.stream(e.getStackTrace()).forEach(x -> 
+				log.error(x.toString()));
 			return;
 		}
 		
@@ -58,7 +60,8 @@ public class ZamenaHandler {
 				try {
 					actualRecentPinnedMessageText = chat.getRecentPinnedMessageText();
 				} catch (Exception e) {
-					log.warn(CHAT_NOT_EXISTS, chatId);
+					log.warn(e.getMessage());
+					Arrays.stream(e.getStackTrace()).forEach(x -> log.warn(x.toString()));
 					return;
 				}
 				List<String> groupZamena = zamenaData.get(target);
@@ -92,8 +95,14 @@ public class ZamenaHandler {
 						sendedMessage = bot.execute(messageZamenaData);
 					} catch (TelegramApiException e) {
 						log.error(GET_ERROR, e.getMessage());
+						Arrays.stream(e.getStackTrace()).forEach(x -> 
+							log.error(x.toString()));
 						return;
 					}
+					
+					log.info("Замена разослано чату с id {} и с содержимым: \n", 
+							chat.getTelegramChatId());
+					log.info(result);
 					
 					var pinChatMessage = PinChatMessage.builder()
 							.chatId(chatId)
@@ -104,17 +113,26 @@ public class ZamenaHandler {
 						bot.execute(pinChatMessage);
 					} catch (TelegramApiException e) {
 						log.error(GET_ERROR, e.getMessage());
+						Arrays.stream(e.getStackTrace()).forEach(x -> 
+							log.error(x.toString()));
 						return;
 					}
+					
+					log.info("Сообщение c id {} содержащий новую "
+							+ "замены, закреплена чату с id {}", 
+								sendedMessage.getMessageId(), chatId);
 					
 					try {
 					dbTelegramChatService
 						.updateRecentPinnedMessageText(chatId, headTextResult);
 					} catch (Exception e) {
-						log.warn(CHAT_NOT_EXISTS, chatId);
+						log.warn(e.getMessage());
+						Arrays.stream(e.getStackTrace()).forEach(x -> log.warn(x.toString()));
 						return;
 					}
 					mentionUsers(chatId, chat.getSubscribedUsersId());
+					
+					log.info("Обработчик замен завершил свою работу");
 				}
 			}
 		}
@@ -144,8 +162,12 @@ public class ZamenaHandler {
 				
 			} catch (NumberFormatException | TelegramApiException e) {
 				log.error("Что пошло не так: {}", e.getMessage());
+				Arrays.stream(e.getStackTrace()).forEach(x -> 
+					log.error(x.toString()));
 			}
 		});
+		log.info("В чате c id {} упомянуто {} юзеров", 
+				chatId, subscribedUsersId.size());
 	}
 	
 	private int getDayOfMonthByHeadText(String headText) {

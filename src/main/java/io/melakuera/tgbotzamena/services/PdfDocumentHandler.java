@@ -26,6 +26,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PdfDocumentHandler {
 
+	private static final String GET_ERROR = "Что-то произошло критическое: {}";
+
 	private final WebSiteParser webSiteParser;
 
 	private PDFTextStripper pdfStripper;
@@ -40,6 +42,8 @@ public class PdfDocumentHandler {
 	 */
 	public Map<String, List<String>> getZamenaDataByGroup() throws IllegalAccessException {
 
+		log.info("Парсер pdf-документа начал свою работу...");
+		
 		String pdfDocLink = webSiteParser.getZamenaPdfDocumentLink();
 		Map<String, List<String>> zamenaData = new HashMap<>();
 		String[] pdfTexts;
@@ -53,7 +57,7 @@ public class PdfDocumentHandler {
 			pdfTexts = pdfStripper.getText(pdfDoc).split("\n");
 
 		} catch (IOException e) {
-			log.error("Что-то критическое произошло: {}", e.getMessage());
+			log.error(GET_ERROR, e.getMessage());
 			return Collections.emptyMap();
 		}
 		
@@ -66,11 +70,15 @@ public class PdfDocumentHandler {
 				zamenaData.put("head", List.of(text));
 			}
 
+			String[] splittedText = text.split(" ");
+			int savedI = i;
 			// КС 1-21 4п Адабият Каримова Э.М. 37
-			if (keysGroup.contains(text.split(" ")[0])) {
+			if (keysGroup.contains(splittedText[0])) {
 
-				String groupName = text.substring(0, 8).replaceFirst(" ", "");
-				String classInfo = text.substring(9, text.length()).strip();
+				String groupName = 
+						splittedText[0].concat(" ").concat(splittedText[1]);
+				String classInfo = String.join(" ", 
+						Arrays.copyOfRange(splittedText, 2, splittedText.length));
 				List<String> groupZamena = new ArrayList<>();
 
 				groupZamena.add(classInfo);
@@ -82,14 +90,18 @@ public class PdfDocumentHandler {
 				}
 				zamenaData.put(groupName, groupZamena);
 			}
+			i = savedI;
 		}
 		try {
 			pdfDoc.close();
 		} catch (IOException e) {
-			log.error("Что-то критическое произошло: {}", e.getMessage());
+			log.error(GET_ERROR, e.getMessage());
 			return Collections.emptyMap();
 		}
 
+		log.info("Парсер pdf-документа завершил свою работу. Результат:");
+		zamenaData.forEach((key, value) -> log.info("{}: {} ", key, value));
+		
 		if (zamenaData.size() <= 1) {
 			return Collections.emptyMap();
 		}

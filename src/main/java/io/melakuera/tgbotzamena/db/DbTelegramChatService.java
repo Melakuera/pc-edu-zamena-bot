@@ -21,7 +21,7 @@ public class DbTelegramChatService {
 		
 		if (telegramChatRepo.findById(chatId).isPresent()) {
 			throw new IllegalArgumentException(
-					String.format("Чат с id %s уже существует", chatId));
+					String.format(CHAT_NOT_EXISTS, chatId));
 		}
 		var newChat = new TelegramChat(chatId, target);
 		telegramChatRepo.insert(newChat);
@@ -77,11 +77,12 @@ public class DbTelegramChatService {
 	
 	// Получить группу на которую подписана телеграм-группа
 	public String getTarget(String chatId) {
-		var chat = telegramChatRepo.findById(chatId).orElseThrow(() -> {
-			throw new IllegalArgumentException(
-					String.format(CHAT_NOT_EXISTS, chatId));
-		});
-		return chat.getTarget();
+		var chat = telegramChatRepo.findById(chatId).orElse(null);
+		
+		if (chat != null) {
+			return chat.getTarget();
+		}
+		return "";
 	}
 	
 	// Изменить группу на которую подписана телеграм-группа

@@ -32,7 +32,7 @@ public class CallbackQueryHandler {
 			if (!result) {
 				
 				return EditMessageText.builder()
-						.text(BotMessages.QUIT_YES_ERROR.getMessage())
+						.text(BotMessages.GROUP_NOT_APPLY_ERROR.getMessage())
 						.messageId(messageId)
 						.chatId(chatId)
 						.build();

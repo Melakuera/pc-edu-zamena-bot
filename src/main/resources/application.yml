@@ -10,6 +10,9 @@ telegram:
   example-gif-url: ${EXAMPLE_GIF_URL}
   bot-username: ${BOT_USERNAME}
   
+cron:
+  expression: ${CRON_VALUE}
+
 server:
   port: ${SERVER_PORT}
 
@@ -17,5 +20,3 @@ spring:
   data:
     mongodb:
       uri: ${MONGODB_URI}
-#      username: ${MONGODB_USER}
-#      password: ${MONGODB_PASSWORD}
