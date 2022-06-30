@@ -100,9 +100,8 @@ public class ZamenaHandler {
 						return;
 					}
 					
-					log.info("Замена разослано чату с id {} и с содержимым: \n", 
-							chat.getTelegramChatId());
-					log.info(result);
+					log.info("Замена разослано чату с id {} и с содержимым: \n{}", 
+							chat.getTelegramChatId(), result);
 					
 					var pinChatMessage = PinChatMessage.builder()
 							.chatId(chatId)
