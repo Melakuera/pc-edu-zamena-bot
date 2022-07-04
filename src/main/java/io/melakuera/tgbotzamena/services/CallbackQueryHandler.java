@@ -8,6 +8,7 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import io.melakuera.tgbotzamena.db.DbTelegramChatService;
 import io.melakuera.tgbotzamena.enums.BotMessages;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /*
  * Обработчик колбэк запросов
@@ -15,6 +16,7 @@ import lombok.RequiredArgsConstructor;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CallbackQueryHandler {
 
 	private final DbTelegramChatService dbTelegramChatService;
@@ -38,6 +40,9 @@ public class CallbackQueryHandler {
 						.build();
 				
 			}
+			
+			log.info("Чат с id {} отписался от замен", chatId);
+
 			return EditMessageText.builder()
 					.text(BotMessages.QUIT_YES.getMessage())
 					.messageId(messageId)

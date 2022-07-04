@@ -86,6 +86,7 @@ public class DbTelegramChatService {
 	}
 	
 	// Изменить группу на которую подписана телеграм-группа
+	// если таковая, то изменяет target и recentPinnedMessageText на пустую строку
 	public boolean updateTarget(String chatId, String target) {
 		var chat = telegramChatRepo.findById(chatId).orElse(null);
 		
@@ -93,6 +94,7 @@ public class DbTelegramChatService {
 			return false;
 		}
 		chat.setTarget(target);
+		chat.setRecentPinnedMessageText("");
 		telegramChatRepo.save(chat);
 		
 		return true;

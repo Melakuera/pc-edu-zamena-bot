@@ -152,8 +152,6 @@ public class MessageHandler {
 			
 			var inlineKeyboardMarkup = inlineKeyboardMaker.getInlineKeyboardMarkup();
 			
-			log.info("Чат с id {} отписался от замен", chatId);
-			
 			return SendMessage.builder()
 					.text(BotMessages.QUIT.getMessage())
 					.chatId(chatId)
