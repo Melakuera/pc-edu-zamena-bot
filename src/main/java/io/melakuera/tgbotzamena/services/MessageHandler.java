@@ -151,7 +151,7 @@ public class MessageHandler {
 		else if (messageText.matches("/quit.*")) {
 			
 			var inlineKeyboardMarkup = inlineKeyboardMaker.getInlineKeyboardMarkup();
-			
+						
 			return SendMessage.builder()
 					.text(BotMessages.QUIT.getMessage())
 					.chatId(chatId)

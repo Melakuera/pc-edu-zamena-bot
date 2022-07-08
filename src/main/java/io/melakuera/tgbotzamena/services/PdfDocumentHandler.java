@@ -10,7 +10,6 @@ import java.util.Map;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
-import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 
@@ -31,8 +30,6 @@ public class PdfDocumentHandler {
 	private final WebSiteParser webSiteParser;
 
 	private PDFTextStripper pdfStripper;
-	private PDDocument pdfDoc;
-	private Resource pdfResource;
 
 	private static final String KEY_WORD = "ЗАМЕНА";
 	private final List<String> keysGroup = getFacultyTypeRusNames();
@@ -47,64 +44,52 @@ public class PdfDocumentHandler {
 		String pdfDocLink = webSiteParser.getZamenaPdfDocumentLink();
 		Map<String, List<String>> zamenaData = new HashMap<>();
 		String[] pdfTexts;
-
-		try {
+		
+		try (PDDocument pdfDoc = PDDocument.load(new UrlResource(pdfDocLink).getInputStream())) {
+			
 			pdfStripper = new PDFTextStripper();
-			pdfResource = new UrlResource(pdfDocLink);
-
-			pdfDoc = PDDocument.load(pdfResource.getInputStream());
-
 			pdfTexts = pdfStripper.getText(pdfDoc).split("\n");
+			
+			for (int i = 0; i < pdfTexts.length; i++) {
 
+				String text = pdfTexts[i].strip();
+
+				// Например: ЗАМЕНА НА ПЯТНИЦУ – 24 ИЮНЯ (ЧИСЛИТЕЛЬ) 2022г
+				if (text.contains(KEY_WORD.toLowerCase()) || text.contains(KEY_WORD)) {
+					zamenaData.put("head", List.of(text));
+				}
+
+				String[] splittedText = text.split(" ");
+				int savedI = i;
+				// КС 1-21 4п Адабият Каримова Э.М. 37
+				if (keysGroup.contains(splittedText[0])) {
+
+					String groupName = 
+							splittedText[0].concat(" ").concat(splittedText[1]);
+					String classInfo = String.join(" ", 
+							Arrays.copyOfRange(splittedText, 2, splittedText.length));
+					List<String> groupZamena = new ArrayList<>();
+
+					groupZamena.add(classInfo);
+					i++;
+
+					while (i < pdfTexts.length && pdfTexts[i].strip().matches("^\\d.+")) {
+						groupZamena.add(pdfTexts[i].strip());
+						i++;
+					}
+					zamenaData.put(groupName, groupZamena);
+				}
+				i = savedI;
+			}
 		} catch (IOException e) {
 			log.error(GET_ERROR, e.getMessage());
 			return Collections.emptyMap();
 		}
 		
-		for (int i = 0; i < pdfTexts.length; i++) {
-
-			String text = pdfTexts[i].strip();
-
-			// Например: ЗАМЕНА НА ПЯТНИЦУ – 24 ИЮНЯ (ЧИСЛИТЕЛЬ) 2022г
-			if (text.contains(KEY_WORD.toLowerCase()) || text.contains(KEY_WORD)) {
-				zamenaData.put("head", List.of(text));
-			}
-
-			String[] splittedText = text.split(" ");
-			int savedI = i;
-			// КС 1-21 4п Адабият Каримова Э.М. 37
-			if (keysGroup.contains(splittedText[0])) {
-
-				String groupName = 
-						splittedText[0].concat(" ").concat(splittedText[1]);
-				String classInfo = String.join(" ", 
-						Arrays.copyOfRange(splittedText, 2, splittedText.length));
-				List<String> groupZamena = new ArrayList<>();
-
-				groupZamena.add(classInfo);
-				i++;
-
-				while (i < pdfTexts.length && pdfTexts[i].strip().matches("^\\d.+")) {
-					groupZamena.add(pdfTexts[i].strip());
-					i++;
-				}
-				zamenaData.put(groupName, groupZamena);
-			}
-			i = savedI;
-		}
-		try {
-			pdfDoc.close();
-		} catch (IOException e) {
-			log.error(GET_ERROR, e.getMessage());
-			return Collections.emptyMap();
-		}
 
 		log.info("Парсер pdf-документа завершил свою работу. Результат:");
 		zamenaData.forEach((key, value) -> log.info("{}: {} ", key, value));
-		
-		if (zamenaData.size() <= 1) {
-			return Collections.emptyMap();
-		}
+
 		return zamenaData;
 	}
 
