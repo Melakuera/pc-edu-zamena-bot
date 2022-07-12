@@ -7,7 +7,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendAnimation;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
-import io.melakuera.tgbotzamena.db.DbTelegramChatService;
+import io.melakuera.tgbotzamena.db.TelegramChatService;
 import io.melakuera.tgbotzamena.enums.BotMessages;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class MessageHandler {
 
-	private final DbTelegramChatService dbTelegramChatService;
+	private final TelegramChatService dbTelegramChatService;
 	private final InlineKeyboardMaker inlineKeyboardMaker;
 	private final GifHandler gifHandler;
 	

@@ -5,7 +5,7 @@ import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 
-import io.melakuera.tgbotzamena.db.DbTelegramChatService;
+import io.melakuera.tgbotzamena.db.TelegramChatService;
 import io.melakuera.tgbotzamena.enums.BotMessages;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CallbackQueryHandler {
 
-	private final DbTelegramChatService dbTelegramChatService;
+	private final TelegramChatService dbTelegramChatService;
 	
 	public BotApiMethod<?> handleCallbackQuery(CallbackQuery callbackQuery) {
 		

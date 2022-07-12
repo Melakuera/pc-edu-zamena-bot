@@ -10,8 +10,8 @@ import java.util.Map;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
-import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import io.melakuera.tgbotzamena.enums.FacultyType;
 import lombok.RequiredArgsConstructor;
@@ -27,8 +27,6 @@ public class PdfDocumentHandler {
 
 	private static final String GET_ERROR = "Что-то произошло критическое: {}";
 
-	private final WebSiteParser webSiteParser;
-
 	private PDFTextStripper pdfStripper;
 
 	private static final String KEY_WORD = "ЗАМЕНА";
@@ -37,15 +35,14 @@ public class PdfDocumentHandler {
 	/*
 	 * Возвращает замену по заданной группе
 	 */
-	public Map<String, List<String>> getZamenaDataByGroup() throws IllegalAccessException {
+	public Map<String, List<String>> parsePdfDoc(MultipartFile zamenaFile) {
 
 		log.info("Парсер pdf-документа начал свою работу...");
 		
-		String pdfDocLink = webSiteParser.getZamenaPdfDocumentLink();
 		Map<String, List<String>> zamenaData = new HashMap<>();
 		String[] pdfTexts;
 		
-		try (PDDocument pdfDoc = PDDocument.load(new UrlResource(pdfDocLink).getInputStream())) {
+		try (PDDocument pdfDoc = PDDocument.load(zamenaFile.getInputStream())) {
 			
 			pdfStripper = new PDFTextStripper();
 			pdfTexts = pdfStripper.getText(pdfDoc).split("\n");
@@ -86,9 +83,11 @@ public class PdfDocumentHandler {
 			return Collections.emptyMap();
 		}
 		
-
 		log.info("Парсер pdf-документа завершил свою работу. Результат:");
 		zamenaData.forEach((key, value) -> log.info("{}: {} ", key, value));
+		
+		if (zamenaData.size() < 1)
+			return Collections.emptyMap();
 
 		return zamenaData;
 	}

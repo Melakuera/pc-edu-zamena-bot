@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
  */
 @Service
 @RequiredArgsConstructor
-public class DbTelegramChatService {
+public class TelegramChatService {
 
 	private static final String CHAT_NOT_EXISTS = "Чат с id %s не существует";
 	private final TelegramChatRepo telegramChatRepo;
