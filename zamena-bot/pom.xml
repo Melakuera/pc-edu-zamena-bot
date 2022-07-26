@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>io.melakuera</groupId>
-	<artifactId>tg-bot-zamena</artifactId>
+	<artifactId>zamena-bot</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>tg-bot-zamena</name>
 	<description>Demo project for Spring Boot</description>
