@@ -31,7 +31,7 @@ public class WebhookController {
 	
 	// Когда от GUI приложение пришел запрос
 	@PostMapping("/zamena")
-	Map<?, ?> onZamenaRecieved(@RequestParam("zamena") MultipartFile zamenaFile) {
+	Map<String, String> onZamenaRecieved(@RequestParam("zamena") MultipartFile zamenaFile) {
 
 		return zamenaHandler.onZamenaRecieved(zamenaFile);
 	}

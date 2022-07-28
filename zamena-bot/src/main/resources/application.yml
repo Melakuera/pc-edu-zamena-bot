@@ -9,7 +9,8 @@ telegram:
   webhook-path: ${WEBHOOK_PATH}
   example-gif-file-id: ${EXAMPLE_GIF_FILE_ID}
   bot-username: ${BOT_USERNAME}
-  
+
+# deprecated
 cron:
   expression: ${CRON_VALUE}
 

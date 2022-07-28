@@ -60,21 +60,20 @@ public class ZamenaHandler {
 			
 			return response;
 			
-		} else {
-			zamenaService.putZamena(zamenaData);
-			
-			sendZamena(zamenaData);
-			
-			response.put("status", "ok");
-			response.put("timestamp", LocalDateTime.now().toString());
-			response.put("massege", "PDF-Документ успешно загружен");
-			response.put("size", Long.toString(zamenaFile.getSize()));
-			response.put("filename", zamenaFile.getName());
-			
-			log.info("Обработчик замен завершил свою работу");
-			
-			return response;
 		}
+		zamenaService.putZamena(zamenaData);
+		
+		sendZamena(zamenaData);
+		
+		response.put("status", "ok");
+		response.put("timestamp", LocalDateTime.now().toString());
+		response.put("massege", "PDF-Документ успешно загружен");
+		response.put("size", Long.toString(zamenaFile.getSize()));
+		response.put("filename", zamenaFile.getName());
+		
+		log.info("Обработчик замен завершил свою работу");
+		
+		return response;
 	}
 
 	/*

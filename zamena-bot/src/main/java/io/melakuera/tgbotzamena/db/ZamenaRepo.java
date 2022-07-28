@@ -9,5 +9,4 @@ public interface ZamenaRepo extends MongoRepository<Zamena, String>{
 	
 	@Query("{ 'current_zamena': 'single_data' }")
 	Zamena getCurrentZamena();
-
 }

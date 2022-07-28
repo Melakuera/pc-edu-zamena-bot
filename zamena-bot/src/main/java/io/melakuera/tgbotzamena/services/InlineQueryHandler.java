@@ -41,12 +41,12 @@ public class InlineQueryHandler {
 	private List<InlineQueryResultArticle> getInlineQueryResultsByFaculty(
 			String facultyRusName) {
 
-		switch (facultyRusName) {
-			case "ЭкСС", "СССК": return getInlineQueryResultsByEKSSOrSSSK(facultyRusName);
-			case "ЭССС": return getInlineQueryResultsByESSS(facultyRusName);
-			case "ПКС", "КС": return getInlineQueryResultsByPKSOrKS(facultyRusName);
-			default: return Collections.emptyList();
-		}
+		return switch (facultyRusName) {
+			case "ЭкСС", "СССК" -> getInlineQueryResultsByEKSSOrSSSK(facultyRusName);
+			case "ЭССС" -> getInlineQueryResultsByESSS(facultyRusName);
+			case "ПКС", "КС" -> getInlineQueryResultsByPKSOrKS(facultyRusName);
+			default -> Collections.emptyList();
+		};
 	}
 	
 	// Строитель Inline-клавиатуры для групп ЭкСС или СССК
@@ -78,27 +78,25 @@ public class InlineQueryHandler {
 			}
 			return result;
 			
-		} else {
-			
-			for (int i = 1; i <= 3; i++) {
-	
-				String text = facultyRusName + " 1" + "-" + (currentYear - i);
-	
-				InputTextMessageContent inputContent = InputTextMessageContent.builder()
-						.messageText(
-								BotMessages.SUCCESS_APPLY_FACULTY.getMessage() + " " + text)
-						.build();
-	
-				InlineQueryResultArticle article = InlineQueryResultArticle.builder()
-						.title(text)
-						.id(text)
-						.inputMessageContent(inputContent)
-						.build();
-	
-				result.add(article);
-			}
-			return result;
 		}
+		for (int i = 1; i <= 3; i++) {
+
+			String text = facultyRusName + " 1" + "-" + (currentYear - i);
+
+			InputTextMessageContent inputContent = InputTextMessageContent.builder()
+					.messageText(
+							BotMessages.SUCCESS_APPLY_FACULTY.getMessage() + " " + text)
+					.build();
+
+			InlineQueryResultArticle article = InlineQueryResultArticle.builder()
+					.title(text)
+					.id(text)
+					.inputMessageContent(inputContent)
+					.build();
+
+			result.add(article);
+		}
+		return result;
 	}
 	
 	// Строитель Inline-клавиатуры для группы ЭССС
@@ -130,27 +128,25 @@ public class InlineQueryHandler {
 				}
 			return result;
 		} 
-		else {
-			for (int i = 1; i <= 3; i++)
-				for (int j = 1; j <= 4; j++) {
+		for (int i = 1; i <= 3; i++)
+			for (int j = 1; j <= 4; j++) {
 
-					String text = facultyRusName + " " + j + "-" + (currentYear - i);
+				String text = facultyRusName + " " + j + "-" + (currentYear - i);
 
-					InputTextMessageContent inputContent = InputTextMessageContent.builder()
-							.messageText(
-									BotMessages.SUCCESS_APPLY_FACULTY.getMessage() + " " + text)
-							.build();
+				InputTextMessageContent inputContent = InputTextMessageContent.builder()
+						.messageText(
+								BotMessages.SUCCESS_APPLY_FACULTY.getMessage() + " " + text)
+						.build();
 
-					InlineQueryResultArticle article = InlineQueryResultArticle.builder()
-							.title(text)
-							.id(text)
-							.inputMessageContent(inputContent)
-							.build();
+				InlineQueryResultArticle article = InlineQueryResultArticle.builder()
+						.title(text)
+						.id(text)
+						.inputMessageContent(inputContent)
+						.build();
 
-					result.add(article);
-				}
-			return result;
-		}
+				result.add(article);
+			}
+		return result;
 	}
 	
 	// Строитель Inline-клавиатуры для группы ПКС или КС
@@ -200,43 +196,42 @@ public class InlineQueryHandler {
 				}
 			return result;
 			
-		} else {
-			for (int i = 1; i <= 3; i++) {
+		}
+		for (int i = 1; i <= 3; i++) {
+	
+			String text = facultyRusName + " " + i + "-" + (currentYear - 1) ;
+	
+			InputTextMessageContent inputContent = InputTextMessageContent.builder()
+					.messageText(
+							BotMessages.SUCCESS_APPLY_FACULTY.getMessage() + " " + text)
+					.build();
+	
+			InlineQueryResultArticle article = InlineQueryResultArticle.builder()
+					.title(text)
+					.id(text)
+					.inputMessageContent(inputContent)
+					.build();
+	
+			result.add(article);
+		}
 		
-				String text = facultyRusName + " " + i + "-" + (currentYear - 1) ;
-		
+		for (int i = 2; i <= 3; i++)
+			for (int j = 1; j <= 2; j++) {
+				String text = facultyRusName + " " + j + "-" + (currentYear - i);
+	
 				InputTextMessageContent inputContent = InputTextMessageContent.builder()
 						.messageText(
 								BotMessages.SUCCESS_APPLY_FACULTY.getMessage() + " " + text)
 						.build();
-		
+	
 				InlineQueryResultArticle article = InlineQueryResultArticle.builder()
 						.title(text)
 						.id(text)
 						.inputMessageContent(inputContent)
 						.build();
-		
+	
 				result.add(article);
 			}
-			
-			for (int i = 2; i <= 3; i++)
-				for (int j = 1; j <= 2; j++) {
-					String text = facultyRusName + " " + j + "-" + (currentYear - i);
-		
-					InputTextMessageContent inputContent = InputTextMessageContent.builder()
-							.messageText(
-									BotMessages.SUCCESS_APPLY_FACULTY.getMessage() + " " + text)
-							.build();
-		
-					InlineQueryResultArticle article = InlineQueryResultArticle.builder()
-							.title(text)
-							.id(text)
-							.inputMessageContent(inputContent)
-							.build();
-		
-					result.add(article);
-				}
-			return result;
-		}
+		return result;
 	}
 }

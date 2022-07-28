@@ -28,7 +28,5 @@ public class Zamena {
 		super();
 		this.currentZamena = "single_data";
 		this.zamenaData = zamenaData;
-	}
-	
-	
+	}	
 }

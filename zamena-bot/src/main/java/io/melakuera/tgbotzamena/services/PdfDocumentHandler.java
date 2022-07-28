@@ -33,7 +33,7 @@ public class PdfDocumentHandler {
 	private final List<String> keysGroup = getFacultyTypeRusNames();
 
 	/*
-	 * Возвращает замену по заданной группе
+	 * Парсит замена PDF файл
 	 */
 	public Map<String, List<String>> parsePdfDoc(MultipartFile zamenaFile) {
 
