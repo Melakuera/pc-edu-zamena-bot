@@ -29,6 +29,7 @@ public class WebhookController {
 		return zamenaPinnerBot.onWebhookUpdateReceived(update);
 	}
 	
+	// Когда от GUI приложение пришел запрос
 	@PostMapping("/zamena")
 	Map<?, ?> onZamenaRecieved(@RequestParam("zamena") MultipartFile zamenaFile) {
 

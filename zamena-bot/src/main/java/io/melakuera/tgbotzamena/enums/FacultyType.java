@@ -1,6 +1,6 @@
 package io.melakuera.tgbotzamena.enums;
 
-// Перечисление представляющий полное наименование факультета
+// Константы представляющий наименование факультета
 public enum FacultyType {
 	
 	PKS("ПКС"), KS("КС"), ESSS("ЭССС"),

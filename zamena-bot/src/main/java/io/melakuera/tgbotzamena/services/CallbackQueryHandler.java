@@ -21,12 +21,13 @@ public class CallbackQueryHandler {
 
 	private final TelegramChatService dbTelegramChatService;
 	
+	// Точка входа
 	public BotApiMethod<?> handleCallbackQuery(CallbackQuery callbackQuery) {
 		
 		String query = callbackQuery.getData();
 		String chatId = callbackQuery.getMessage().getChatId().toString();
 		int messageId = callbackQuery.getMessage().getMessageId();
-		
+
 		if (query.matches("quit_yes")) {
 			
 			boolean result = dbTelegramChatService.deleteChat(chatId);

@@ -12,6 +12,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import io.melakuera.tgbotzamena.telegram.ZamenaPinnerBot;
 import lombok.extern.slf4j.Slf4j;
 
+// Обработчик единственного gif файла
 @Service
 @Slf4j
 public class GifHandler {

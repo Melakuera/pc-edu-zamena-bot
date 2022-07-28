@@ -19,7 +19,7 @@ public class MainConfig {
 
     /*
      * Зарегистрировать вебхук:
-     * https://api.telegram.org/bot<токен бота>/setWebhook?url=<url от ngrok>
+     * https://api.telegram.org/bot<токен бота>/setWebhook?url=<url на которую будут приходить update>
      * 
      * Получение инфо вебхук данного бота
      * https://api.telegram.org/bot<токен бота>/getWebhookInfo

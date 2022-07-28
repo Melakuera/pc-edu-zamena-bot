@@ -9,12 +9,18 @@ import com.mongodb.lang.NonNull;
 
 import lombok.Data;
 
+/*
+ *  Модель представляющий замену.
+ *  В БД храниться всегда в одном экземпляре
+ */
 @Document
 @Data
 public class Zamena {
 	
+	// Строка представляющий один и тот же экземпляр
 	@NonNull
 	private String currentZamena;
+	// распарсенные данные о замене 
 	@NonNull
 	private Map<String, List<String>> zamenaData;
 	

@@ -23,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class InlineQueryHandler {
 
+	// точка входа
 	public BotApiMethod<?> handleInlineQuery(InlineQuery inlineQuery) {
 
 		String query = inlineQuery.getQuery();
@@ -37,7 +38,7 @@ public class InlineQueryHandler {
 				.build();
 	}
 
-	public List<InlineQueryResultArticle> getInlineQueryResultsByFaculty(
+	private List<InlineQueryResultArticle> getInlineQueryResultsByFaculty(
 			String facultyRusName) {
 
 		switch (facultyRusName) {
@@ -48,6 +49,7 @@ public class InlineQueryHandler {
 		}
 	}
 	
+	// Строитель Inline-клавиатуры для групп ЭкСС или СССК
 	private List<InlineQueryResultArticle> getInlineQueryResultsByEKSSOrSSSK(
 			String facultyRusName) {
 		
@@ -99,6 +101,7 @@ public class InlineQueryHandler {
 		}
 	}
 	
+	// Строитель Inline-клавиатуры для группы ЭССС
 	private List<InlineQueryResultArticle> getInlineQueryResultsByESSS(
 			String facultyRusName)  {
 		
@@ -150,14 +153,15 @@ public class InlineQueryHandler {
 		}
 	}
 	
+	// Строитель Inline-клавиатуры для группы ПКС или КС
 	private List<InlineQueryResultArticle> getInlineQueryResultsByPKSOrKS(
 			String facultyRusName) {
 		
 		int currentMonth = LocalDate.now().getMonthValue();
 		int currentYear = LocalDate.now().getYear() % 100;
 		List<InlineQueryResultArticle> result = new ArrayList<>();
-//		если нын. месяц года позже сентября, то надо: 22 - 21 - 20, иначе: 21 - 20 - 19
 		
+		// если нын. месяц года позже сентября, то надо: 22 - 21 - 20, иначе: 21 - 20 - 19
 		if (currentMonth >= 9) {
 			for (int i = 1; i <= 3; i++) {
 				

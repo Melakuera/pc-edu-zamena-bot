@@ -24,6 +24,7 @@ import io.melakuera.tgbotzamena.telegram.ZamenaPinnerBot;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+// Обработчик замен
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -37,10 +38,16 @@ public class ZamenaHandler {
 	private static final String MARKDOWN = "Markdown";
 	private static final String GET_ERROR = "Что-то произошло критическое: {}";
 	
+	/**
+	 * Когда из GUI приложение доставлено новая замена (PDF файл) 
+	 * @param zamenaFile PDF файл
+	 * @return ответ
+	 */
 	public Map<String, String> onZamenaRecieved(final MultipartFile zamenaFile) {
 		
 		log.info("Обработчик замен начал свою работу...");
 		
+		// Парсим PDF файл
 		Map<String, List<String>> zamenaData = documentHandler.parsePdfDoc(zamenaFile);
 		Map<String, String> response = new HashMap<>();
 		
@@ -70,46 +77,60 @@ public class ZamenaHandler {
 		}
 	}
 
+	/*
+	 *  Отправляет по всем телеграм-группам свежую распарсенную замену
+	 *  
+	 *  zamenaData может быть след. формата:
+	 *  {
+	 *  	head=[ЗАМЕНА НА ПЯТНИЦУ – 01 ИЮЛЯ (ЗНАМЕНАТЕЛЬ) 2022г],
+	 *  	ЭкСС 1-21=[3п Физвоспитание Теркулова У.А.],
+	 *  	ЭССС 1-21=[2п Физвоспитание Теркулова У.А. 43, 3п Математика Абышов И.С.],
+	 *  	ЭССС 2-21=[4п Математика Абышов И.С. 43],
+	 *  	ЭССС 3-21=[5п Математика Лемякина Л.Б.],
+	 *  	ПКС 1-21=[4п Кырг.язык Абдыкеримова/Каримова 65/37]
+	 *  }
+	 */
 	public void sendZamena(Map<String, List<String>> zamenaData) {
 		
 		log.info("Начата отправка замен");
 		
+		// Получает все телеграм-группы в БД
 		List<TelegramChat> chats = dbTelegramChatService.findAll();
 		
+		// Проходится по телеграм-группам
 		for (TelegramChat chat : chats) {
 			
-			String chatId = chat.getTelegramChatId();
-			String target = chat.getTarget();
-			String actualRecentPinnedMessageText;
-			try {
-				actualRecentPinnedMessageText = chat.getRecentPinnedMessageText();
-			} catch (Exception e) {
-				log.warn(e.getMessage());
-				Arrays.stream(e.getStackTrace()).forEach(x -> log.warn(x.toString()));
-				return;
-			}
-			List<String> groupZamena = zamenaData.get(target);
+			String chatId = chat.getTelegramChatId(); // id телеграм-группы
+			String target = chat.getTarget(); // группа на которую подписана телеграм-группа
+			String actualRecentPinnedMessageText = chat.getRecentPinnedMessageText(); // last закрепленное сообщение ботом
+			List<String> groupZamena = zamenaData.get(target); // замена для данной группы (target группа, на которую подписана телеграм-группа)
 			
-			if (groupZamena == null) continue;
+			if (groupZamena == null) continue; // если группа, на которую подписана телеграм-группа не существует в zamenaData,
+										       // то значит, что на замены на данную группы нету
 			
+			// TODO
 			int actualRecentPinnedMessageDayOfMonth = 
-					getDayOfMonthByHeadText(actualRecentPinnedMessageText);
+					getDayOfMonthByHeadText(actualRecentPinnedMessageText); // получаем дату 
 			int zamenaMessageDayOfMonth = 
 					getDayOfMonthByHeadText(zamenaData.get("head").toString());
 			
-			if (actualRecentPinnedMessageDayOfMonth != zamenaMessageDayOfMonth) {
+			if (actualRecentPinnedMessageDayOfMonth != zamenaMessageDayOfMonth) { // сверяемся с датами 
 				
-				StringBuilder groupZamenaResult = new StringBuilder();
-				for (String zamena : groupZamena) {
-					groupZamenaResult.append(zamena + "\n");
+				// Извлекаем данные новой замены (groupZamena) лишь данной группы (target)
+				StringBuilder groupZamenaResult = new StringBuilder(); // Н: [2п Физвоспитание Теркулова У.А. 43, 3п Математика Абышов И.С.], -> 
+				for (String zamena : groupZamena) {					   // 2п Физвоспитание Теркулова У.А. 43 
+					groupZamenaResult.append(zamena + "\n");		   // 3п Математика Абышов И.С.
 				}
 				
+				// Извлекаем заголовок ( ЗАМЕНА НА ПЯТНИЦУ – 01 ИЮЛЯ (ЗНАМЕНАТЕЛЬ) 2022г )
 				String headText = zamenaData.get("head").toString();
 				String headTextResult = headText
 						.substring(1, headText.length() - 1) + "\n";
 				
+				// Складываем тексты:
 				String result = (headTextResult + groupZamenaResult).strip();
-				
+
+				// Отправляем сообщение
 				var messageZamenaData = SendMessage.builder()
 						.text(result)
 						.chatId(chatId)
@@ -127,11 +148,11 @@ public class ZamenaHandler {
 				log.info("Замена разослано чату с id {} и с содержимым: \n{}", 
 						chat.getTelegramChatId(), result);
 				
+				// Закрепляем сообщение
 				var pinChatMessage = PinChatMessage.builder()
 						.chatId(chatId)
 						.messageId(sendedMessage.getMessageId())
 						.build();
-				
 				try {
 					bot.execute(pinChatMessage);
 				} catch (TelegramApiException e) {
@@ -145,6 +166,7 @@ public class ZamenaHandler {
 						+ "замены, закреплена чату с id {}", 
 							sendedMessage.getMessageId(), chatId);
 				
+				// Заменяем last закрепленное сообщение
 				try {
 				dbTelegramChatService
 					.updateRecentPinnedMessageText(chatId, headTextResult);
@@ -153,6 +175,8 @@ public class ZamenaHandler {
 					Arrays.stream(e.getStackTrace()).forEach(x -> log.warn(x.toString()));
 					return;
 				}
+				
+				// Упоминаем юзеров
 				mentionUsers(chatId, chat.getSubscribedUsersId());
 				
 				log.info("Замены отправлены");
@@ -160,7 +184,12 @@ public class ZamenaHandler {
 		}
 	}
 	
-	public void mentionUsers(String chatId, List<String> subscribedUsersId) {
+	/**
+	 * Упоминает всех юзеров в заданной телеграм-группе
+	 * @param chatId id телеграм-группы (не должно быть null)
+	 * @param subscribedUsersId список id юзеров, подписавшиеся на замены группы (не должно быть null)
+	 */
+	private void mentionUsers(String chatId, List<String> subscribedUsersId) {
 		
 		StringBuilder sb = new StringBuilder();
 		
@@ -192,6 +221,8 @@ public class ZamenaHandler {
 				chatId, subscribedUsersId.size());
 	}
 	
+	// Извлекает день из headText
+	// Н: ЗАМЕНА НА ПЯТНИЦУ – 01 ИЮЛЯ (ЗНАМЕНАТЕЛЬ) 2022г -> 01 -> 1
 	private int getDayOfMonthByHeadText(String headText) {
 		
 		Pattern patter = Pattern.compile("\\d{2}");

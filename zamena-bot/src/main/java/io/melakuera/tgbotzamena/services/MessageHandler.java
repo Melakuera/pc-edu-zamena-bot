@@ -31,7 +31,7 @@ public class MessageHandler {
 	@Value("${telegram.bot-username}")
 	private String botUsername;
 
-
+	// Точка входа
 	public BotApiMethod<?> handleMessage(Message message) {
 		
 		String chatId = message.getChatId().toString();

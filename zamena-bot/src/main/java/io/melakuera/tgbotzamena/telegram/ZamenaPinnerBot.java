@@ -12,6 +12,7 @@ import io.melakuera.tgbotzamena.services.CallbackQueryHandler;
 import io.melakuera.tgbotzamena.services.InlineQueryHandler;
 import io.melakuera.tgbotzamena.services.MessageHandler;
 
+// Сам бот
 @Component
 public class ZamenaPinnerBot extends SpringWebhookBot {
 

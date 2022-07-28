@@ -33,7 +33,7 @@ public class TelegramChat {
 	@Field("recent_pinned_message_text")
 	private String recentPinnedMessageText;
 	
-	// Список id юзеров, которые подписаны на вход. замены
+	// Список id юзеров, которые подписаны на входящие замены
 	@Field("subscribed_users_id")
 	private List<String> subscribedUsersId;
 

@@ -9,9 +9,11 @@ import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
 
-/*
+/**
  * Парсер сайта https://pc.edu.kg
+ * @deprecated был временным решением
  */
+@Deprecated(since="0.0.1", forRemoval=true)
 @Service
 @Slf4j
 public class WebSiteParser {
@@ -21,7 +23,7 @@ public class WebSiteParser {
 	private static final String CSS_SELECTOR_TAG_A = 
 			"div.span2:nth-child(4) > div:nth-child(1) > div:nth-child(3) > a:nth-child(1)";
 	
-	//Возвращает ссылку на pdf документ
+	// Возвращает ссылку на pdf документ
 	public String getZamenaPdfDocumentLink() throws IllegalAccessException {
 
 		log.info("Парсер веб-сайта начал свою работу...");
