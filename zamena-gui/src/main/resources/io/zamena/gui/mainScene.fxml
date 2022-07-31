@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Accordion?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.zamena.gui.AppController">
+   <children>
+      <Button fx:id="fileInput" layoutX="182.0" layoutY="326.0" mnemonicParsing="false" onAction="#fileInput" prefHeight="46.0" prefWidth="286.0" text="Выбрать PDF документ">
+         <font>
+            <Font size="22.0" />
+         </font>
+      </Button>
+      <Button fx:id="acceptBtn" layoutX="182.0" layoutY="326.0" mnemonicParsing="false" onAction="#onClickAcceptBtn" prefHeight="46.0" prefWidth="134.0" text="Принять" visible="false">
+         <font>
+            <Font size="22.0" />
+         </font>
+      </Button>
+      <Button fx:id="cancelBtn" layoutX="334.0" layoutY="326.0" mnemonicParsing="false" onAction="#onClickCancelBtn" prefHeight="46.0" prefWidth="134.0" text="Отменить" visible="false">
+         <font>
+            <Font size="22.0" />
+         </font>
+      </Button>
+      <Label fx:id="mainLabel" alignment="CENTER" contentDisplay="CENTER" layoutX="17.0" layoutY="22.0" prefHeight="46.0" prefWidth="567.0">
+         <font>
+            <Font size="22.0" />
+         </font>
+      </Label>
+      <Accordion layoutX="98.0" layoutY="103.0" />
+    <TitledPane animated="false" contentDisplay="CENTER" layoutX="16.0" layoutY="68.0" prefHeight="245.0" prefWidth="567.0" text="логи">
+         <content>
+            <ScrollPane prefHeight="200.0" prefWidth="200.0">
+               <content>
+                  <TextArea fx:id="outputLog" editable="false" prefHeight="219.0" prefWidth="565.0" />
+               </content>
+            </ScrollPane>
+         </content>
+    </TitledPane>
+   </children>
+</AnchorPane>

@@ -11,7 +11,6 @@ import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
  * Конфигурационный класс 
  */
 @Configuration
-@EnableScheduling
 public class MainConfig {
 	
 	@Value("${telegram.webhook-path}")

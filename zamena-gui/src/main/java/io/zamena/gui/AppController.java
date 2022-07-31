@@ -1,9 +1,11 @@
-package io.melakuera.zamenabotgui;
+package io.zamena.gui;
 
 import java.io.File;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
+import org.apache.hc.client5.http.HttpHostConnectException;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.entity.mime.FileBody;
 import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
@@ -19,19 +21,23 @@ import org.json.simple.parser.ParseException;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-public class ZamenaBotController {
+public class AppController {
 
     private Stage stage;
+    
     public void setStage(Stage stage) {
         this.stage = stage;
     }
-    private static final String BASE_URL = "http://localhost:8432/zamena";
-    private static final Logger logger = Logger.getLogger(ZamenaBotController.class.getName());
+    
+    private static final String BASE_URL = "https://zamena-bot.herokuapp.com/zamena";
 
     private File file;
+    
+    private JSONParser jsonParser = new JSONParser();
 
     @FXML
     private Label mainLabel;
@@ -42,10 +48,10 @@ public class ZamenaBotController {
     @FXML
     private Button cancelBtn;
     @FXML
-    private Label outputLog;
+    private TextArea outputLog;
 
     @FXML
-    protected void fileInput() {
+    public void fileInput() {
 
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Выберите PDF-документ");
@@ -67,7 +73,7 @@ public class ZamenaBotController {
     }
 
     @FXML
-    protected void onClickAcceptBtn() {
+    public void onClickAcceptBtn() {
 
     	try (CloseableHttpClient client = HttpClients.createDefault()) {
     		
@@ -76,45 +82,71 @@ public class ZamenaBotController {
     	    		.addPart("zamena", new FileBody(file)).build();
     	    post.setEntity(entity);
 
-    	    try (CloseableHttpResponse response = client.execute(post)) {
+    	    CloseableHttpResponse response = client.execute(post);
 
-                String responseData = EntityUtils.toString(
-                        response.getEntity(), "UTF-8");
+            handleResponse(response);
+            
+            clearScene();
 
-                handleResponse(responseData);
-
-            } catch (Exception e) {
-                logger.log(Level.WARNING, "Ошибка");
-                mainLabel.setText("Ошибка");
-            }
-
-    	} catch (Exception e) {
-            logger.log(Level.WARNING, "Ошибка");
-            mainLabel.setText("Ошибка");
-        }
+    	} catch (HttpHostConnectException e) {
+    		e.printStackTrace();
+            mainLabel.setText("Приложение на данный момент недоступен");
+            setOutputLog(e);
+            
+            clearScene();
+    	} catch (IllegalArgumentException e) {
+    		e.printStackTrace();
+			mainLabel.setText(e.getMessage());
+			setOutputLog(e);
+            
+			clearScene();
+		} catch (IOException |
+				org.apache.hc.core5.http.ParseException | 
+				ParseException e) {
+    		e.printStackTrace();
+    		
+    		setOutputLog(e);
+		} 
     }
-
-    private void handleResponse(String responseData) throws ParseException {
-
-        JSONParser jsonParser = new JSONParser();
-        JSONObject responseJson = (JSONObject) jsonParser.parse(responseData);
-
-        if (responseJson.get("status").equals("ok")) {
-            mainLabel.setText("PDF-Документ успешно загружен");
-        } else {
-            mainLabel.setText("Ошибка");
-        }
-    }
-
+    
     @FXML
-    protected void onClickCancelBtn() {
+    public void onClickCancelBtn() {
 
         mainLabel.setText("");
 
-        fileInput.setVisible(true);
+        clearScene();
+    }
+
+    private void handleResponse(CloseableHttpResponse response) 
+    		throws ParseException,
+    		org.apache.hc.core5.http.ParseException, 
+    		IllegalArgumentException,
+    		IOException {
+
+    	String responseData = EntityUtils.toString(
+                response.getEntity(), "UTF-8");
+    	
+        JSONObject responseJson = (JSONObject) jsonParser.parse(responseData);
+        
+        if (responseJson.get("status").equals("fail")) {
+            throw new IllegalArgumentException((String) responseJson.get("massege"));
+        }
+        mainLabel.setText("PDF-Документ успешно загружен");
+    }
+    
+    private void clearScene() {
+    	fileInput.setVisible(true);
         acceptBtn.setVisible(false);
         cancelBtn.setVisible(false);
         
         file = null;
+    }
+    
+    private void setOutputLog(Exception e) {
+    	
+    	StringWriter errors = new StringWriter();
+    	e.printStackTrace(new PrintWriter(errors));
+    	
+    	outputLog.setText(errors.toString());
     }
 }
