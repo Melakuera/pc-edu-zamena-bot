@@ -12,7 +12,7 @@ import org.telegram.telegrambots.meta.api.objects.inlinequery.InlineQuery;
 import org.telegram.telegrambots.meta.api.objects.inlinequery.inputmessagecontent.InputTextMessageContent;
 import org.telegram.telegrambots.meta.api.objects.inlinequery.result.InlineQueryResultArticle;
 
-import io.melakuera.tgbotzamena.enums.BotMessages;
+import io.melakuera.tgbotzamena.constants.BotMessages;
 import lombok.RequiredArgsConstructor;
 
 /*
@@ -65,7 +65,7 @@ public class InlineQueryHandler {
 
 				InputTextMessageContent inputContent = InputTextMessageContent.builder()
 						.messageText(
-								BotMessages.SUCCESS_APPLY_FACULTY.getMessage() + " " + text)
+								BotMessages.SUCCESS_APPLY_FACULTY + " " + text)
 						.build();
 
 				InlineQueryResultArticle article = InlineQueryResultArticle.builder()
@@ -85,7 +85,7 @@ public class InlineQueryHandler {
 
 			InputTextMessageContent inputContent = InputTextMessageContent.builder()
 					.messageText(
-							BotMessages.SUCCESS_APPLY_FACULTY.getMessage() + " " + text)
+							BotMessages.SUCCESS_APPLY_FACULTY + " " + text)
 					.build();
 
 			InlineQueryResultArticle article = InlineQueryResultArticle.builder()
@@ -115,7 +115,7 @@ public class InlineQueryHandler {
 	
 					InputTextMessageContent inputContent = InputTextMessageContent.builder()
 							.messageText(
-									BotMessages.SUCCESS_APPLY_FACULTY.getMessage() + " " + text)
+									BotMessages.SUCCESS_APPLY_FACULTY + " " + text)
 							.build();
 	
 					InlineQueryResultArticle article = InlineQueryResultArticle.builder()
@@ -135,7 +135,7 @@ public class InlineQueryHandler {
 
 				InputTextMessageContent inputContent = InputTextMessageContent.builder()
 						.messageText(
-								BotMessages.SUCCESS_APPLY_FACULTY.getMessage() + " " + text)
+								BotMessages.SUCCESS_APPLY_FACULTY + " " + text)
 						.build();
 
 				InlineQueryResultArticle article = InlineQueryResultArticle.builder()
@@ -165,7 +165,7 @@ public class InlineQueryHandler {
 		
 				InputTextMessageContent inputContent = InputTextMessageContent.builder()
 						.messageText(
-								BotMessages.SUCCESS_APPLY_FACULTY.getMessage() + " " + text)
+								BotMessages.SUCCESS_APPLY_FACULTY + " " + text)
 						.build();
 		
 				InlineQueryResultArticle article = InlineQueryResultArticle.builder()
@@ -183,7 +183,7 @@ public class InlineQueryHandler {
 		
 					InputTextMessageContent inputContent = InputTextMessageContent.builder()
 							.messageText(
-									BotMessages.SUCCESS_APPLY_FACULTY.getMessage() + " " + text)
+									BotMessages.SUCCESS_APPLY_FACULTY + " " + text)
 							.build();
 		
 					InlineQueryResultArticle article = InlineQueryResultArticle.builder()
@@ -203,7 +203,7 @@ public class InlineQueryHandler {
 	
 			InputTextMessageContent inputContent = InputTextMessageContent.builder()
 					.messageText(
-							BotMessages.SUCCESS_APPLY_FACULTY.getMessage() + " " + text)
+							BotMessages.SUCCESS_APPLY_FACULTY + " " + text)
 					.build();
 	
 			InlineQueryResultArticle article = InlineQueryResultArticle.builder()
@@ -221,7 +221,7 @@ public class InlineQueryHandler {
 	
 				InputTextMessageContent inputContent = InputTextMessageContent.builder()
 						.messageText(
-								BotMessages.SUCCESS_APPLY_FACULTY.getMessage() + " " + text)
+								BotMessages.SUCCESS_APPLY_FACULTY + " " + text)
 						.build();
 	
 				InlineQueryResultArticle article = InlineQueryResultArticle.builder()

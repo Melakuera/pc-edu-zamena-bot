@@ -5,8 +5,8 @@ import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 
+import io.melakuera.tgbotzamena.constants.BotMessages;
 import io.melakuera.tgbotzamena.db.TelegramChatService;
-import io.melakuera.tgbotzamena.enums.BotMessages;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -35,7 +35,7 @@ public class CallbackQueryHandler {
 			if (!result) {
 				
 				return EditMessageText.builder()
-						.text(BotMessages.GROUP_NOT_APPLY_ERROR.getMessage())
+						.text(BotMessages.GROUP_NOT_APPLY_ERROR)
 						.messageId(messageId)
 						.chatId(chatId)
 						.build();
@@ -45,7 +45,7 @@ public class CallbackQueryHandler {
 			log.info("Чат с id {} отписался от замен", chatId);
 
 			return EditMessageText.builder()
-					.text(BotMessages.QUIT_YES.getMessage())
+					.text(BotMessages.QUIT_YES)
 					.messageId(messageId)
 					.chatId(chatId)
 					.build();
@@ -53,7 +53,7 @@ public class CallbackQueryHandler {
 		else if (query.matches("quit_no")) {
 			
 			return EditMessageText.builder()
-					.text(BotMessages.QUIT_NO.getMessage())
+					.text(BotMessages.QUIT_NO)
 					.messageId(messageId)
 					.chatId(chatId)
 					.build();

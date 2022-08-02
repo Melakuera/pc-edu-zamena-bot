@@ -7,8 +7,8 @@ import org.telegram.telegrambots.meta.api.methods.send.SendAnimation;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
+import io.melakuera.tgbotzamena.constants.BotMessages;
 import io.melakuera.tgbotzamena.db.TelegramChatService;
-import io.melakuera.tgbotzamena.enums.BotMessages;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -41,7 +41,7 @@ public class MessageHandler {
 			
 			var sendAnimBuilder = SendAnimation.builder()
 				.caption(String.format(
-							BotMessages.START_IN_GROUP.getMessage()))
+							BotMessages.START_IN_GROUP))
 				.parseMode(MARKDOWN);
 			
 			gifHandler.sendExampleGif(chatId, sendAnimBuilder);
@@ -63,7 +63,7 @@ public class MessageHandler {
 				
 				return SendMessage.builder()
 						.text(String.format(
-								BotMessages.CONGRATULATION_IF_EXISTS.getMessage(), target))
+								BotMessages.CONGRATULATION_IF_EXISTS, target))
 						.chatId(chatId)
 						.parseMode(MARKDOWN)
 						.build();
@@ -74,7 +74,7 @@ public class MessageHandler {
 			log.info("Чат с id {} подписался на группу {}", chatId, target);
 			
 			return SendMessage.builder()
-					.text(String.format(BotMessages.CONGRATULATION.getMessage(), target))
+					.text(String.format(BotMessages.CONGRATULATION, target))
 					.chatId(chatId)
 					.parseMode(MARKDOWN)
 					.build();
@@ -88,7 +88,7 @@ public class MessageHandler {
 			
 			return SendMessage.builder()
 					.text(String.format(
-							BotMessages.INFO.getMessage(), 
+							BotMessages.INFO, 
 							target, botUsername.replace("_", "\\_")))
 					.parseMode(MARKDOWN)
 					.chatId(chatId)
@@ -104,7 +104,7 @@ public class MessageHandler {
 				isUserAddedToChat = dbTelegramChatService.addUserToChat(chatId, userId);
 			} catch (Exception e) {
 				return SendMessage.builder()
-						.text(BotMessages.GROUP_NOT_APPLY_ERROR.getMessage())
+						.text(BotMessages.GROUP_NOT_APPLY_ERROR)
 						.chatId(chatId)
 						.build();
 			}
@@ -112,12 +112,12 @@ public class MessageHandler {
 			// Если юзер уже присутствует в списке
 			if (!isUserAddedToChat)
 				return SendMessage.builder()
-						.text(BotMessages.MENTION_ERROR.getMessage())
+						.text(BotMessages.MENTION_ERROR)
 						.chatId(chatId)
 						.build();
 			
 			return SendMessage.builder()
-					.text(BotMessages.APPLY_MENTION.getMessage())
+					.text(BotMessages.APPLY_MENTION)
 					.chatId(chatId)
 					.build();
 		}
@@ -131,7 +131,7 @@ public class MessageHandler {
 				isUserRemovedFromChat = dbTelegramChatService.removeUserFromChat(chatId, userId);
 			} catch (Exception e) {
 				return SendMessage.builder()
-						.text(BotMessages.GROUP_NOT_APPLY_ERROR.getMessage())
+						.text(BotMessages.GROUP_NOT_APPLY_ERROR)
 						.chatId(chatId)
 						.build();
 			}
@@ -139,12 +139,12 @@ public class MessageHandler {
 			// Если юзер отсутствует в списке
 			if (!isUserRemovedFromChat)
 				return SendMessage.builder()
-						.text(BotMessages.MENTION_ERROR.getMessage())
+						.text(BotMessages.MENTION_ERROR)
 						.chatId(chatId)
 						.build();
 			
 			return SendMessage.builder()
-					.text(BotMessages.APPLY_MENTION.getMessage())
+					.text(BotMessages.APPLY_MENTION)
 					.chatId(chatId)
 					.build();
 		}
@@ -153,7 +153,7 @@ public class MessageHandler {
 			var inlineKeyboardMarkup = inlineKeyboardMaker.getInlineKeyboardMarkup();
 						
 			return SendMessage.builder()
-					.text(BotMessages.QUIT.getMessage())
+					.text(BotMessages.QUIT)
 					.chatId(chatId)
 					.replyMarkup(inlineKeyboardMarkup)
 					.build();	

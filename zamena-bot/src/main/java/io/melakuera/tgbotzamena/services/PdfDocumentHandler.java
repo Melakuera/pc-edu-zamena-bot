@@ -13,7 +13,7 @@ import org.apache.pdfbox.text.PDFTextStripper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import io.melakuera.tgbotzamena.enums.FacultyType;
+import io.melakuera.tgbotzamena.constants.FacultyType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,7 +30,7 @@ public class PdfDocumentHandler {
 	private PDFTextStripper pdfStripper;
 
 	private static final String KEY_WORD = "ЗАМЕНА";
-	private final List<String> keysGroup = getFacultyTypeRusNames();
+	private final List<String> keysGroup = FacultyType.values();
 
 	/*
 	 * Парсит замена PDF файл
@@ -65,7 +65,7 @@ public class PdfDocumentHandler {
 							splittedText[0].concat(" ").concat(splittedText[1]);
 					String classInfo = String.join(" ", 
 							Arrays.copyOfRange(splittedText, 2, splittedText.length));
-					List<String> groupZamena = new ArrayList<>();
+					List<String> groupZamena = new ArrayList();
 
 					groupZamena.add(classInfo);
 					i++;
@@ -90,10 +90,5 @@ public class PdfDocumentHandler {
 			return Collections.emptyMap();
 
 		return zamenaData;
-	}
-
-	private List<String> getFacultyTypeRusNames() {
-
-		return Arrays.stream(FacultyType.values()).map(FacultyType::getRusName).toList();
 	}
 }
