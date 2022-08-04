@@ -38,7 +38,7 @@ public class InlineQueryHandler {
 				.build();
 	}
 
-	private List<InlineQueryResultArticle> getInlineQueryResultsByFaculty(
+	public List<InlineQueryResultArticle> getInlineQueryResultsByFaculty(
 			String facultyRusName) {
 
 		return switch (facultyRusName) {
