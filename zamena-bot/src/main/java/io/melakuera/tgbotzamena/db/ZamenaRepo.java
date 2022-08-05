@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ZamenaRepo extends MongoRepository<Zamena, String>{
 	
-	@Query("{ 'current_zamena': 'single_data' }")
+	@Query("{ '_id': 'single_data' }")
 	Zamena getCurrentZamena();
 }

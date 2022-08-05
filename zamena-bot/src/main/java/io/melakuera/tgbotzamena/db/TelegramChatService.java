@@ -18,6 +18,16 @@ public class TelegramChatService {
 	private final TelegramChatRepo telegramChatRepo;
 
 	/**
+	 * Возвращает телеграм-группу по заданному шв
+	 * 
+	 * @param chatId id телеграм-группы (не должно быть null)
+	 * @return телеграм-группу
+	 */
+	public TelegramChat getById(String chatId) {
+		return telegramChatRepo.findById(chatId).orElseThrow(() -> {
+			throw new IllegalArgumentException(String.format(CHAT_NOT_EXISTS, chatId));});
+	}
+	/**
 	 * Сохраняет заданный телеграм-группу
 	 * 
 	 * @param chatId id телеграм-группы (не должно быть null)
@@ -28,8 +38,7 @@ public class TelegramChatService {
 		
 		// Если такая телеграм-группа существует, то ошибка
 		if (telegramChatRepo.findById(chatId).isPresent()) {
-			throw new IllegalArgumentException(
-					String.format(CHAT_NOT_EXISTS, chatId));
+			return;
 		}
 		var newChat = new TelegramChat(chatId, target);
 		telegramChatRepo.insert(newChat);

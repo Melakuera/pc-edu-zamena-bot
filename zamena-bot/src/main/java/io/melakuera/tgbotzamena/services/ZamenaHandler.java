@@ -63,7 +63,7 @@ public class ZamenaHandler {
 		}
 		zamenaService.putZamena(zamenaData);
 		
-		sendZamena(zamenaData);
+		sendZamenaToAll(zamenaData);
 		
 		response.put("status", "ok");
 		response.put("timestamp", LocalDateTime.now().toString());
@@ -89,7 +89,7 @@ public class ZamenaHandler {
 	 *  	ПКС 1-21=[4п Кырг.язык Абдыкеримова/Каримова 65/37]
 	 *  }
 	 */
-	public void sendZamena(Map<String, List<String>> zamenaData) {
+	public void sendZamenaToAll(Map<String, List<String>> zamenaData) {
 		
 		log.info("Начата отправка замен");
 		
@@ -107,7 +107,6 @@ public class ZamenaHandler {
 			if (groupZamena == null) continue; // если группа, на которую подписана телеграм-группа не существует в zamenaData,
 										       // то значит, что на замены на данную группы нету
 			
-			// TODO
 			int actualRecentPinnedMessageDayOfMonth = 
 					getDayOfMonthByHeadText(actualRecentPinnedMessageText); // получаем дату 
 			int zamenaMessageDayOfMonth = 
@@ -168,7 +167,7 @@ public class ZamenaHandler {
 				// Заменяем last закрепленное сообщение
 				try {
 				dbTelegramChatService
-					.updateRecentPinnedMessageText(chatId, headTextResult);
+					.updateRecentPinnedMessageText(chatId, headTextResult.trim());
 				} catch (Exception e) {
 					log.warn(e.getMessage());
 					Arrays.stream(e.getStackTrace()).forEach(x -> log.warn(x.toString()));
@@ -182,6 +181,66 @@ public class ZamenaHandler {
 			}
 		}
 	}
+	public void sendZamenaToOne(String chatId, String target, Map<String, List<String>> zamenaData) {
+		
+		TelegramChat chat = dbTelegramChatService.getById(chatId);
+		
+		StringBuilder groupZamenaResult = new StringBuilder();
+		for (String zamena : zamenaData.get(target)) {
+			groupZamenaResult.append(zamena + "\n");
+		}
+		
+		String headTextResult = String.join("", zamenaData.get("head")) + "\n";
+		
+		String result = (headTextResult + groupZamenaResult).strip();
+		
+		var messageZamenaData = SendMessage.builder()
+				.text(result)
+				.chatId(chatId)
+				.build();	
+		Message sendedMessage;
+		try {
+			sendedMessage = bot.execute(messageZamenaData);
+		} catch (TelegramApiException e) {
+			log.error(GET_ERROR, e.getMessage());
+			Arrays.stream(e.getStackTrace()).forEach(x -> 
+				log.error(x.toString()));
+			return;
+		}
+		
+		var pinChatMessage = PinChatMessage.builder()
+				.chatId(chatId)
+				.messageId(sendedMessage.getMessageId())
+				.build();
+		try {
+			bot.execute(pinChatMessage);
+		} catch (TelegramApiException e) {
+			log.error(GET_ERROR, e.getMessage());
+			Arrays.stream(e.getStackTrace()).forEach(x -> 
+				log.error(x.toString()));
+			return;
+		}
+		
+		log.info("Сообщение c id {} содержащий новую "
+				+ "замены, закреплена чату с id {}", 
+					sendedMessage.getMessageId(), chatId);
+		
+		// Заменяем last закрепленное сообщение
+		try {
+		dbTelegramChatService
+			.updateRecentPinnedMessageText(chatId, headTextResult.trim());
+		} catch (Exception e) {
+			log.warn(e.getMessage());
+			Arrays.stream(e.getStackTrace()).forEach(x -> log.warn(x.toString()));
+			return;
+		}
+		
+		// Упоминаем юзеров
+		mentionUsers(chatId, chat.getSubscribedUsersId());
+		
+		log.info("Замены отправлены");
+	}
+	
 	
 	/**
 	 * Упоминает всех юзеров в заданной телеграм-группе

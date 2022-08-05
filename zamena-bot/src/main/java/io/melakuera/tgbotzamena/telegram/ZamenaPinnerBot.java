@@ -2,6 +2,7 @@ package io.melakuera.tgbotzamena.telegram;
 
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
@@ -29,7 +30,7 @@ public class ZamenaPinnerBot extends SpringWebhookBot {
 	
 	public ZamenaPinnerBot(
 			SetWebhook setWebhook, 
-			MessageHandler messageHandler,
+			@Lazy MessageHandler messageHandler,
 			InlineQueryHandler inlineQueryHandler,
 			CallbackQueryHandler callbackQueryHandler) {
 		

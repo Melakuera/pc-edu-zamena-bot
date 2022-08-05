@@ -1,6 +1,8 @@
 package io.melakuera.tgbotzamena.db;
 
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,11 +22,21 @@ public class ZamenaService {
 	 */
 	public void putZamena(Map<String, List<String>> zamenaData) {
 		var currentZamena = zamenaRepo.getCurrentZamena();
-		if (currentZamena == null) {
-			zamenaRepo.insert(new Zamena(zamenaData));
-		} else {
-			currentZamena.setZamenaData(zamenaData);
-			zamenaRepo.save(currentZamena);
-		}
+		currentZamena.setZamenaData(zamenaData);
+		zamenaRepo.save(currentZamena);
+	}
+	
+	public Map<String, List<String>> getGroupZamenaByGroup(String group) {
+		Map<String, List<String>> zamenaData = zamenaRepo.getCurrentZamena().getZamenaData();
+		List<String> groupZamena = zamenaData.get(group);
+		List<String> headText = zamenaData.get("head");
+		
+		if (groupZamena == null) return Collections.emptyMap();
+		
+		Map<String, List<String>> map = new HashMap<>();
+		map.put(group, groupZamena);
+		map.put("head", headText);
+		
+		return map;
 	}
 }

@@ -36,7 +36,7 @@ class InlineQueryHandlerTests {
 			"2023-12-04, 23"  // Новенькие не пришли, а 20-годники закончили обучение и это в 2023 году (23, 22, 21)
 	})
 	@DisplayName("ЭкСС")
-	void shouldReturnsEkssArticlesCorrectly_whenTodayIsBeforeSeptember(
+	void shouldReturnsEkssArticlesCorrectly(
 			String instantExpected, int mockYear) {
 
 		LocalDate mockedDate = LocalDate.parse(instantExpected);
@@ -68,7 +68,7 @@ class InlineQueryHandlerTests {
 			"2023-12-04, 23"
 	})
 	@DisplayName("СССК")
-	void shouldReturnsSsskArticlesCorrectly_whenTodayIsBeforeSeptember(
+	void shouldReturnsSsskArticlesCorrectly(
 			String instantExpected, int mockYear) {
 
 		LocalDate mockedDate = LocalDate.parse(instantExpected);
@@ -99,7 +99,7 @@ class InlineQueryHandlerTests {
 			"2023-12-04, 23"
 	})
 	@DisplayName("ПКС")
-	void shouldReturnsPksArticlesCorrectly_whenTodayIsBeforeSeptember(
+	void shouldReturnsPksArticlesCorrectly(
 			String instantExpected, int mockYear) {
 
 		LocalDate mockedDate = LocalDate.parse(instantExpected);
@@ -148,7 +148,7 @@ class InlineQueryHandlerTests {
 			"2023-12-04, 23"
 	})
 	@DisplayName("КС")
-	void shouldReturnsKsArticlesCorrectly_whenTodayIsBeforeSeptember(
+	void shouldReturnsKsArticlesCorrectly(
 			String instantExpected, int mockYear) {
 
 		LocalDate mockedDate = LocalDate.parse(instantExpected);
@@ -195,7 +195,7 @@ class InlineQueryHandlerTests {
 			"2023-12-04, 23"
 	})
 	@DisplayName("ЭССС")
-	void shouldReturnsEsssArticlesCorrectly_whenTodayIsBeforeSeptember(
+	void shouldReturnsEsssArticlesCorrectly(
 			String instantExpected, int mockYear) {
 
 		LocalDate mockedDate = LocalDate.parse(instantExpected);
