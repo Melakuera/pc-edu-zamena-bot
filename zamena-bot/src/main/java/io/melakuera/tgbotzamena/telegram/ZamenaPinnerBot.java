@@ -42,7 +42,7 @@ public class ZamenaPinnerBot extends SpringWebhookBot {
 
 	@Override
 	public BotApiMethod<?> onWebhookUpdateReceived(Update update) {
-		
+
 		if (update.hasInlineQuery()) {
 			return inlineQueryHandler.handleInlineQuery(update.getInlineQuery());
 		}

@@ -26,15 +26,14 @@ public class InlineQueryHandler {
 	// точка входа
 	public BotApiMethod<?> handleInlineQuery(InlineQuery inlineQuery) {
 
-		String query = inlineQuery.getQuery();
+		String query = inlineQuery.getQuery().strip();
 		
 		List<InlineQueryResultArticle> articles = 
 				getInlineQueryResultsByFaculty(query);
-
+		
 		return AnswerInlineQuery.builder()
 				.inlineQueryId(inlineQuery.getId())
 				.results(articles)
-				.cacheTime(24 * 60 * 60) // 1 день
 				.build();
 	}
 
@@ -42,20 +41,21 @@ public class InlineQueryHandler {
 			String facultyRusName) {
 
 		return switch (facultyRusName) {
-			case "ЭкСС", "СССК" -> getInlineQueryResultsByEKSSOrSSSK(facultyRusName);
-			case "ЭССС" -> getInlineQueryResultsByESSS(facultyRusName);
-			case "ПКС", "КС" -> getInlineQueryResultsByPKSOrKS(facultyRusName);
+			case "ЭкСС", "СССК" -> getInlineQueryResultsByEkssOrSssk(facultyRusName);
+			case "ЭССС" -> getInlineQueryResultsByEsss(facultyRusName);
+			case "ПКС", "КС" -> getInlineQueryResultsByPksOrKs(facultyRusName);
 			default -> Collections.emptyList();
 		};
 	}
 	
 	// Строитель Inline-клавиатуры для групп ЭкСС или СССК
-	private List<InlineQueryResultArticle> getInlineQueryResultsByEKSSOrSSSK(
+	private List<InlineQueryResultArticle> getInlineQueryResultsByEkssOrSssk(
 			String facultyRusName) {
 		
 		int currentMonth = LocalDate.now().getMonthValue();
 		int currentYear = LocalDate.now().getYear() % 100;
 		List<InlineQueryResultArticle> result = new ArrayList<>();
+		
 		
 		if (currentMonth >= 9) {
 			
@@ -100,7 +100,7 @@ public class InlineQueryHandler {
 	}
 	
 	// Строитель Inline-клавиатуры для группы ЭССС
-	private List<InlineQueryResultArticle> getInlineQueryResultsByESSS(
+	private List<InlineQueryResultArticle> getInlineQueryResultsByEsss(
 			String facultyRusName)  {
 		
 		int currentMonth = LocalDate.now().getMonthValue();
@@ -150,7 +150,7 @@ public class InlineQueryHandler {
 	}
 	
 	// Строитель Inline-клавиатуры для группы ПКС или КС
-	private List<InlineQueryResultArticle> getInlineQueryResultsByPKSOrKS(
+	private List<InlineQueryResultArticle> getInlineQueryResultsByPksOrKs(
 			String facultyRusName) {
 		
 		int currentMonth = LocalDate.now().getMonthValue();
@@ -159,79 +159,46 @@ public class InlineQueryHandler {
 		
 		// если нын. месяц года позже сентября, то надо: 22 - 21 - 20, иначе: 21 - 20 - 19
 		if (currentMonth >= 9) {
-			for (int i = 1; i <= 3; i++) {
-				
-				String text = facultyRusName + " " + i + "-" + currentYear;
-		
-				InputTextMessageContent inputContent = InputTextMessageContent.builder()
-						.messageText(
-								BotMessages.SUCCESS_APPLY_FACULTY + " " + text)
-						.build();
-		
-				InlineQueryResultArticle article = InlineQueryResultArticle.builder()
-						.title(text)
-						.id(text)
-						.inputMessageContent(inputContent)
-						.build();
-		
-				result.add(article);
-			}
+			for (int j = currentYear; j >= currentYear - 2; j--) {
+				for (int i = 1; i <= 3; i++) {
+					
+					String text = facultyRusName + " " + i + "-" + j;
 			
-			for (int i = 1; i <= 2; i++)
-				for (int j = 1; j <= 2; j++) {
-					String text = facultyRusName + " " + j + "-" + (currentYear - i);
-		
 					InputTextMessageContent inputContent = InputTextMessageContent.builder()
 							.messageText(
 									BotMessages.SUCCESS_APPLY_FACULTY + " " + text)
 							.build();
-		
+			
 					InlineQueryResultArticle article = InlineQueryResultArticle.builder()
 							.title(text)
 							.id(text)
 							.inputMessageContent(inputContent)
 							.build();
-		
+			
 					result.add(article);
 				}
+			}
 			return result;
-			
 		}
-		for (int i = 1; i <= 3; i++) {
-	
-			String text = facultyRusName + " " + i + "-" + (currentYear - 1) ;
-	
-			InputTextMessageContent inputContent = InputTextMessageContent.builder()
-					.messageText(
-							BotMessages.SUCCESS_APPLY_FACULTY + " " + text)
-					.build();
-	
-			InlineQueryResultArticle article = InlineQueryResultArticle.builder()
-					.title(text)
-					.id(text)
-					.inputMessageContent(inputContent)
-					.build();
-	
-			result.add(article);
-		}
+		for (int j = currentYear - 1; j >= currentYear - 3; j--) {
+			for (int i = 1; i <= 3; i++) {
+				
+				String text = facultyRusName + " " + i + "-" + j;
 		
-		for (int i = 2; i <= 3; i++)
-			for (int j = 1; j <= 2; j++) {
-				String text = facultyRusName + " " + j + "-" + (currentYear - i);
-	
 				InputTextMessageContent inputContent = InputTextMessageContent.builder()
 						.messageText(
 								BotMessages.SUCCESS_APPLY_FACULTY + " " + text)
 						.build();
-	
+		
 				InlineQueryResultArticle article = InlineQueryResultArticle.builder()
 						.title(text)
 						.id(text)
 						.inputMessageContent(inputContent)
 						.build();
-	
+		
 				result.add(article);
 			}
+		}
 		return result;
 	}
 }

@@ -5,8 +5,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,10 +34,14 @@ public class ZamenaHandler {
 	private final ZamenaService zamenaService;
 	
 	private static final String MARKDOWN = "Markdown";
+	private static final String MESSAGE = "message";
+	private static final String TIMESTAMP = "timestamp";
+	private static final String STATUS = "status";
+	private static final String HANDLER_IS_DONE = "Обработчик замен завершил свою работу";
 	private static final String GET_ERROR = "Что-то произошло критическое: {}";
 	
 	/**
-	 * Когда из GUI приложение доставлено новая замена (PDF файл) 
+	 * Когда из GUI приложение пришла новая замена (PDF файл) 
 	 * @param zamenaFile PDF файл
 	 * @return ответ
 	 */
@@ -52,26 +54,40 @@ public class ZamenaHandler {
 		Map<String, String> response = new HashMap<>();
 		
 		if (zamenaData.size() == 0) {
-			response.put("status", "fail");
-			response.put("timestamp", LocalDateTime.now().toString());
-			response.put("massege", "PDF-Документ невалидный");	
+			response.put(STATUS, "fail");
+			response.put(TIMESTAMP, LocalDateTime.now().toString());
+			response.put(MESSAGE, "PDF-Документ невалидный");	
 			
-			log.info("Обработчик замен завершил свою работу");
+			log.info(HANDLER_IS_DONE);
 			
 			return response;
 			
 		}
-		zamenaService.putZamena(zamenaData);
+		try {
+			// В бд заменяем старую замену
+			zamenaService.putZamena(zamenaData);
+			
+			// И рассылаем всем замену
+			sendZamenaToAll(zamenaData);			
+		} catch (Exception e) {
+			log.error(e.getMessage());
+			
+			response.put(STATUS, "fail");
+			response.put(TIMESTAMP, LocalDateTime.now().toString());
+			response.put(MESSAGE, "Что-то случилось!");	
+			
+			log.info(HANDLER_IS_DONE);
+			
+			return response;
+		}
 		
-		sendZamenaToAll(zamenaData);
-		
-		response.put("status", "ok");
-		response.put("timestamp", LocalDateTime.now().toString());
-		response.put("massege", "PDF-Документ успешно загружен");
+		response.put(STATUS, "ok");
+		response.put(TIMESTAMP, LocalDateTime.now().toString());
+		response.put(MESSAGE, "PDF-Документ успешно загружен");
 		response.put("size", Long.toString(zamenaFile.getSize()));
 		response.put("filename", zamenaFile.getName());
 		
-		log.info("Обработчик замен завершил свою работу");
+		log.info(HANDLER_IS_DONE);
 		
 		return response;
 	}
@@ -101,84 +117,87 @@ public class ZamenaHandler {
 			
 			String chatId = chat.getTelegramChatId(); // id телеграм-группы
 			String target = chat.getTarget(); // группа на которую подписана телеграм-группа
-			String actualRecentPinnedMessageText = chat.getRecentPinnedMessageText(); // last закрепленное сообщение ботом
+			/*
+			 * String actualRecentPinnedMessageText = chat.getRecentPinnedMessageText(); //
+			 * last закрепленное сообщение ботом
+			 */			
 			List<String> groupZamena = zamenaData.get(target); // замена для данной группы (target группа, на которую подписана телеграм-группа)
 			
 			if (groupZamena == null) continue; // если группа, на которую подписана телеграм-группа не существует в zamenaData,
 										       // то значит, что на замены на данную группы нету
-			
-			int actualRecentPinnedMessageDayOfMonth = 
-					getDayOfMonthByHeadText(actualRecentPinnedMessageText); // получаем дату 
-			int zamenaMessageDayOfMonth = 
-					getDayOfMonthByHeadText(zamenaData.get("head").toString());
-			
-			if (actualRecentPinnedMessageDayOfMonth != zamenaMessageDayOfMonth) { // сверяемся с датами 
-				
+			/*
+			 * int actualRecentPinnedMessageDayOfMonth =
+			 * getDayOfMonthByHeadText(actualRecentPinnedMessageText); // получаем дату int
+			 * zamenaMessageDayOfMonth =
+			 * getDayOfMonthByHeadText(zamenaData.get("head").toString());
+			 * 
+			 * if (actualRecentPinnedMessageDayOfMonth != zamenaMessageDayOfMonth) { //сверяемся с датами
+			 */
 				// Извлекаем данные новой замены (groupZamena) лишь данной группы (target)
-				StringBuilder groupZamenaResult = new StringBuilder(); // Н: [2п Физвоспитание Теркулова У.А. 43, 3п Математика Абышов И.С.], -> 
-				for (String zamena : groupZamena) {					   // 2п Физвоспитание Теркулова У.А. 43 
-					groupZamenaResult.append(zamena + "\n");		   // 3п Математика Абышов И.С.
-				}
-				
-				// Извлекаем заголовок ( ЗАМЕНА НА ПЯТНИЦУ – 01 ИЮЛЯ (ЗНАМЕНАТЕЛЬ) 2022г )
-				String headText = zamenaData.get("head").toString();
-				String headTextResult = headText
-						.substring(1, headText.length() - 1) + "\n";
-				
-				// Складываем тексты:
-				String result = (headTextResult + groupZamenaResult).strip();
-
-				// Отправляем сообщение
-				var messageZamenaData = SendMessage.builder()
-						.text(result)
-						.chatId(chatId)
-						.build();	
-				Message sendedMessage;
-				try {
-					sendedMessage = bot.execute(messageZamenaData);
-				} catch (TelegramApiException e) {
-					log.error(GET_ERROR, e.getMessage());
-					Arrays.stream(e.getStackTrace()).forEach(x -> 
-						log.error(x.toString()));
-					return;
-				}
-				
-				log.info("Замена разослано чату с id {} и с содержимым: \n{}", 
-						chat.getTelegramChatId(), result);
-				
-				// Закрепляем сообщение
-				var pinChatMessage = PinChatMessage.builder()
-						.chatId(chatId)
-						.messageId(sendedMessage.getMessageId())
-						.build();
-				try {
-					bot.execute(pinChatMessage);
-				} catch (TelegramApiException e) {
-					log.error(GET_ERROR, e.getMessage());
-					Arrays.stream(e.getStackTrace()).forEach(x -> 
-						log.error(x.toString()));
-					return;
-				}
-				
-				log.info("Сообщение c id {} содержащий новую "
-						+ "замены, закреплена чату с id {}", 
-							sendedMessage.getMessageId(), chatId);
-				
-				// Заменяем last закрепленное сообщение
-				try {
-				dbTelegramChatService
-					.updateRecentPinnedMessageText(chatId, headTextResult.trim());
-				} catch (Exception e) {
-					log.warn(e.getMessage());
-					Arrays.stream(e.getStackTrace()).forEach(x -> log.warn(x.toString()));
-					return;
-				}
-				
-				// Упоминаем юзеров
-				mentionUsers(chatId, chat.getSubscribedUsersId());
-				
-				log.info("Замены отправлены");
+			StringBuilder groupZamenaResult = new StringBuilder(); // Н: [2п Физвоспитание Теркулова У.А. 43, 3п Математика Абышов И.С.], -> 
+			for (String zamena : groupZamena) {					   // 2п Физвоспитание Теркулова У.А. 43 
+				groupZamenaResult.append(zamena + "\n");		   // 3п Математика Абышов И.С.
 			}
+			
+			// Извлекаем заголовок ( ЗАМЕНА НА ПЯТНИЦУ – 01 ИЮЛЯ (ЗНАМЕНАТЕЛЬ) 2022г )
+			String headText = zamenaData.get("head").toString();
+			String headTextResult = headText
+					.substring(1, headText.length() - 1) + "\n";
+			
+			// Складываем тексты:
+			String result = (headTextResult + groupZamenaResult).strip();
+
+			// Отправляем сообщение
+			var messageZamenaData = SendMessage.builder()
+					.text(result)
+					.chatId(chatId)
+					.build();	
+			Message sendedMessage;
+			try {
+				sendedMessage = bot.execute(messageZamenaData);
+			} catch (TelegramApiException e) {
+				log.error(GET_ERROR, e.getMessage());
+				Arrays.stream(e.getStackTrace()).forEach(x -> 
+					log.error(x.toString()));
+				return;
+			}
+			
+			log.info("Замена разослано чату с id {} и с содержимым: \n{}", 
+					chat.getTelegramChatId(), result);
+			
+			// Закрепляем сообщение
+			var pinChatMessage = PinChatMessage.builder()
+					.chatId(chatId)
+					.messageId(sendedMessage.getMessageId())
+					.build();
+			try {
+				bot.execute(pinChatMessage);
+			} catch (TelegramApiException e) {
+				log.error(GET_ERROR, e.getMessage());
+				Arrays.stream(e.getStackTrace()).forEach(x -> 
+					log.error(x.toString()));
+				return;
+			}
+			
+			log.info("Сообщение c id {} содержащий новую "
+					+ "замены, закреплена чату с id {}", 
+						sendedMessage.getMessageId(), chatId);
+			/*
+			// Заменяем last закрепленное сообщение
+			try {
+			dbTelegramChatService
+				.updateRecentPinnedMessageText(chatId, headTextResult.trim());
+			} catch (Exception e) {
+				log.warn(e.getMessage());
+				Arrays.stream(e.getStackTrace()).forEach(x -> log.warn(x.toString()));
+				return;
+			}
+			*/
+			
+			// Упоминаем юзеров
+			mentionUsers(chatId, chat.getSubscribedUsersId());
+			
+			log.info("Замены отправлены");
 		}
 	}
 	public void sendZamenaToOne(String chatId, String target, Map<String, List<String>> zamenaData) {
@@ -225,6 +244,7 @@ public class ZamenaHandler {
 				+ "замены, закреплена чату с id {}", 
 					sendedMessage.getMessageId(), chatId);
 		
+		/*
 		// Заменяем last закрепленное сообщение
 		try {
 		dbTelegramChatService
@@ -234,6 +254,7 @@ public class ZamenaHandler {
 			Arrays.stream(e.getStackTrace()).forEach(x -> log.warn(x.toString()));
 			return;
 		}
+		*/
 		
 		// Упоминаем юзеров
 		mentionUsers(chatId, chat.getSubscribedUsersId());
@@ -281,17 +302,19 @@ public class ZamenaHandler {
 	
 	// Извлекает день из headText
 	// Н: ЗАМЕНА НА ПЯТНИЦУ – 01 ИЮЛЯ (ЗНАМЕНАТЕЛЬ) 2022г -> 01 -> 1
-	private int getDayOfMonthByHeadText(String headText) {
-		
-		Pattern patter = Pattern.compile("\\d{2}");
-		Matcher matcher = patter.matcher(headText);
-		int dayOfMonth = -1;
-		if (matcher.find()) {
-		    String t = headText.substring(matcher.start(), matcher.end());
-		    dayOfMonth = Integer.parseInt(t);
-		}
-		return dayOfMonth;
-	}
+	/*
+	 * private int getDayOfMonthByHeadText(String headText) {
+	 * 
+	 * 		Pattern patter = Pattern.compile("\\d{2}"); 
+	 * 		Matcher matcher = patter.matcher(headText); 
+	 * 		int dayOfMonth = -1; 
+	 * 		if (matcher.find()) { 
+	 * 			String t = headText.substring(matcher.start(), matcher.end()); 
+	 * 			dayOfMonth = Integer.parseInt(t); 
+	 * 		} 
+	 * 		return dayOfMonth; 
+	 * }
+	 */
 
 	
 }

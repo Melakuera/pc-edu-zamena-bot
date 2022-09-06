@@ -65,7 +65,7 @@ public class PdfDocumentHandler {
 							splittedText[0].concat(" ").concat(splittedText[1]);
 					String classInfo = String.join(" ", 
 							Arrays.copyOfRange(splittedText, 2, splittedText.length));
-					List<String> groupZamena = new ArrayList();
+					List<String> groupZamena = new ArrayList<>();
 
 					groupZamena.add(classInfo);
 					i++;

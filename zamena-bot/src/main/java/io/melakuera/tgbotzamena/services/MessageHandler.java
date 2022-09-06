@@ -37,7 +37,7 @@ public class MessageHandler {
 	private static final String MARKDOWN = "Markdown";
 	private static final String GET_ERROR = "Что-то произошло критическое: {}";
 	private static final String REGEX = 
-			"Выбрана группа:\\s[ЭкСС|СССК|ЭССС|КС|ПКС]{2,4}\\s[1-3]-\\d{2}";
+			"Выбрана группа:\\s[ЭкСС|СССК|ЭССС|КС|ПКС]{2,4}\\s[1-4]-\\d{2}";
 	
 	@Value("${telegram.bot-username}")
 	private String botUsername;
@@ -48,7 +48,7 @@ public class MessageHandler {
 		String chatId = message.getChatId().toString();
 		String messageText = message.getText();
 		
-		if (messageText.matches("/start.*")) {
+		if (messageText.equals("/start" + botUsername)) {
 			
 			var sendAnimBuilder = SendAnimation.builder()
 				.caption(String.format(
@@ -63,8 +63,7 @@ public class MessageHandler {
 			
 			// Н: Выбрана группа: ПКС 3-21 -> [Выбрана группа] , [ ПКС 3-21] -> ПКС 3-21
 			String target = message.getText().split(":")[1].substring(1);
-			boolean isChatExists = 
-					dbTelegramChatService.updateTarget(chatId, target);
+			boolean isChatExists = dbTelegramChatService.updateTarget(chatId, target);
 			Map<String, List<String>> groupZamena = zamenaService.getGroupZamenaByGroup(target);
 			
 			// если таковой чат существует
@@ -117,11 +116,8 @@ public class MessageHandler {
 					log.error(x.toString()));
 			}
 			zamenaHandler.sendZamenaToOne(chatId, target, groupZamena);
-			
-			
-			
 		}
-		else if (messageText.matches("/info.*")) {
+		else if (messageText.equals("/info" + botUsername)) {
 			
 			String target = dbTelegramChatService.getTarget(chatId);
 			
@@ -131,13 +127,13 @@ public class MessageHandler {
 			return SendMessage.builder()
 					.text(String.format(
 							BotMessages.INFO, 
-							target, botUsername.replace("_", "\\_")))
+							target, botUsername))
 					.parseMode(MARKDOWN)
 					.chatId(chatId)
 					.build();
 				
 		}
-		else if (messageText.matches("/in.*")) {
+		else if (messageText.equals("/in" + botUsername)) {
 			
 			String userId = message.getFrom().getId().toString();
 			
@@ -164,7 +160,7 @@ public class MessageHandler {
 					.build();
 		}
 		
-		else if (messageText.matches("/out.*")) {
+		else if (messageText.equals("/out" + botUsername)) {
 			
 			String userId = message.getFrom().getId().toString();
 			
@@ -190,7 +186,7 @@ public class MessageHandler {
 					.chatId(chatId)
 					.build();
 		}
-		else if (messageText.matches("/quit.*")) {
+		else if (messageText.equals("/quit" + botUsername)) {
 			
 			var inlineKeyboardMarkup = inlineKeyboardMaker.getInlineKeyboardMarkup();
 						

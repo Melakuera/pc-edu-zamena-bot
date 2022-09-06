@@ -1,5 +1,6 @@
 package io.melakuera.tgbotzamena.db;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -28,5 +29,11 @@ public class Zamena {
 	public Zamena(Map<String, List<String>> zamenaData) {
 		super();
 		this.zamenaData = zamenaData;
-	}	
+	}
+	
+	public static Zamena emptyZamena() {
+		return new Zamena(Collections.emptyMap());
+	}
+	
+	public Zamena() {}
 }

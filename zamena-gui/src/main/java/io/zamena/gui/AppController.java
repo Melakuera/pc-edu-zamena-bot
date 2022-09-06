@@ -33,7 +33,7 @@ public class AppController {
         this.stage = stage;
     }
     
-    private static final String BASE_URL = "https://zamena-bot.herokuapp.com/zamena";
+    private static final String BASE_URL = "https://67f5-94-143-198-244.eu.ngrok.io/zamena";
 
     private File file;
     
@@ -129,9 +129,10 @@ public class AppController {
         JSONObject responseJson = (JSONObject) jsonParser.parse(responseData);
         
         if (responseJson.get("status").equals("fail")) {
-            throw new IllegalArgumentException((String) responseJson.get("massege"));
+            throw new IllegalArgumentException((String) responseJson.get("message"));
         }
-        mainLabel.setText("PDF-Документ успешно загружен");
+        System.out.println(responseJson.toJSONString());
+        mainLabel.setText((String) responseJson.get("message"));
     }
     
     private void clearScene() {

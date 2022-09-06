@@ -18,7 +18,7 @@ public class TelegramChatService {
 	private final TelegramChatRepo telegramChatRepo;
 
 	/**
-	 * Возвращает телеграм-группу по заданному шв
+	 * Возвращает телеграм-группу по заданному id
 	 * 
 	 * @param chatId id телеграм-группы (не должно быть null)
 	 * @return телеграм-группу
@@ -78,6 +78,7 @@ public class TelegramChatService {
 	 * @return последнее закрепленное сообщение
 	 * @throws IllegalArgumentException если телеграм-группа не существует
 	 */
+	/*
 	public String getRecentPinnedMessageText(String chatId) {
 		var actualChat = telegramChatRepo.findById(chatId).orElseThrow(() -> {
 			throw new IllegalArgumentException(
@@ -85,6 +86,7 @@ public class TelegramChatService {
 		});
 		return actualChat.getRecentPinnedMessageText();
 	}
+	*/
 	
 	/**
 	 * Удалить юзера из списка подписавшиеся на замены группы
@@ -185,6 +187,7 @@ public class TelegramChatService {
 	 * @param text новый текст, на которую изменится сообщение (не должно быть null) 
 	 * @throws IllegalArgumentException если телеграм-группа не существует
 	 */
+	/*
 	public void updateRecentPinnedMessageText(String chatId, String text) {
 		var chat = telegramChatRepo.findById(chatId).orElseThrow(() -> {
 			throw new IllegalArgumentException(
@@ -193,4 +196,5 @@ public class TelegramChatService {
 		chat.setRecentPinnedMessageText(text);
 		telegramChatRepo.save(chat);
 	}
+	*/
 }
