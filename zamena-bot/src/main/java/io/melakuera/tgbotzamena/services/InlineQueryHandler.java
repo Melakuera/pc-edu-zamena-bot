@@ -1,9 +1,11 @@
 package io.melakuera.tgbotzamena.services;
 
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.AnswerInlineQuery;
@@ -52,50 +54,25 @@ public class InlineQueryHandler {
 	private List<InlineQueryResultArticle> getInlineQueryResultsByEkssOrSssk(
 			String facultyRusName) {
 		
-		int currentMonth = LocalDate.now().getMonthValue();
+		Month currentMonth = LocalDate.now().getMonth();
 		int currentYear = LocalDate.now().getYear() % 100;
 		List<InlineQueryResultArticle> result = new ArrayList<>();
 		
-		
-		if (currentMonth >= 9) {
+		// если нын. месяц года позже сентября, то надо: 22 - 21 - 20, иначе: 21 - 20 - 19
+		if (isAfterSeptember(currentMonth)) {
 			
-			for (int i = 0; i <= 2; i++) {
-
-				String text = facultyRusName + " 1" + "-" + (currentYear - i);
-
-				InputTextMessageContent inputContent = InputTextMessageContent.builder()
-						.messageText(
-								BotMessages.SUCCESS_APPLY_FACULTY + " " + text)
-						.build();
-
-				InlineQueryResultArticle article = InlineQueryResultArticle.builder()
-						.title(text)
-						.id(text)
-						.inputMessageContent(inputContent)
-						.build();
-
-				result.add(article);
-			}
+			IntStream.of(currentYear, currentYear - 1, currentYear - 2).forEach(year -> {
+				
+				buildEkssOrSsskResultArticle(facultyRusName, result, year);
+			});
 			return result;
 			
 		}
-		for (int i = 1; i <= 3; i++) {
-
-			String text = facultyRusName + " 1" + "-" + (currentYear - i);
-
-			InputTextMessageContent inputContent = InputTextMessageContent.builder()
-					.messageText(
-							BotMessages.SUCCESS_APPLY_FACULTY + " " + text)
-					.build();
-
-			InlineQueryResultArticle article = InlineQueryResultArticle.builder()
-					.title(text)
-					.id(text)
-					.inputMessageContent(inputContent)
-					.build();
-
-			result.add(article);
-		}
+		
+		IntStream.of(currentYear - 1, currentYear - 2, currentYear - 3).forEach(year -> {
+			
+			buildEkssOrSsskResultArticle(facultyRusName, result, year);
+		});
 		return result;
 	}
 	
@@ -103,49 +80,27 @@ public class InlineQueryHandler {
 	private List<InlineQueryResultArticle> getInlineQueryResultsByEsss(
 			String facultyRusName)  {
 		
-		int currentMonth = LocalDate.now().getMonthValue();
+		Month currentMonth = LocalDate.now().getMonth();
 		int currentYear = LocalDate.now().getYear() % 100;
 		List<InlineQueryResultArticle> result = new ArrayList<>();
 		
-		if (currentMonth >= 9) {
-			for (int i = 0; i <= 2; i++)
-				for (int j = 1; j <= 4; j++) {
-	
-					String text = facultyRusName + " " + j + "-" + (currentYear - i);
-	
-					InputTextMessageContent inputContent = InputTextMessageContent.builder()
-							.messageText(
-									BotMessages.SUCCESS_APPLY_FACULTY + " " + text)
-							.build();
-	
-					InlineQueryResultArticle article = InlineQueryResultArticle.builder()
-							.title(text)
-							.id(text)
-							.inputMessageContent(inputContent)
-							.build();
-	
-					result.add(article);
-				}
+		if (isAfterSeptember(currentMonth)) {
+			
+			IntStream.of(currentYear, currentYear - 1, currentYear - 2).forEach(year -> {
+				IntStream.of(1, 2, 3, 4).forEach(num -> {
+					
+					buildEsssOrPksOrKsResultArticle(facultyRusName, result, year, num);
+				});
+			});
 			return result;
-		} 
-		for (int i = 1; i <= 3; i++)
-			for (int j = 1; j <= 4; j++) {
-
-				String text = facultyRusName + " " + j + "-" + (currentYear - i);
-
-				InputTextMessageContent inputContent = InputTextMessageContent.builder()
-						.messageText(
-								BotMessages.SUCCESS_APPLY_FACULTY + " " + text)
-						.build();
-
-				InlineQueryResultArticle article = InlineQueryResultArticle.builder()
-						.title(text)
-						.id(text)
-						.inputMessageContent(inputContent)
-						.build();
-
-				result.add(article);
-			}
+		}
+		
+		IntStream.of(currentYear - 1 , currentYear - 2, currentYear - 3).forEach(year -> {
+			IntStream.of(1, 2, 3, 4).forEach(num -> {
+				
+				buildEsssOrPksOrKsResultArticle(facultyRusName, result, year, num);
+			});
+		});
 		return result;
 	}
 	
@@ -153,52 +108,64 @@ public class InlineQueryHandler {
 	private List<InlineQueryResultArticle> getInlineQueryResultsByPksOrKs(
 			String facultyRusName) {
 		
-		int currentMonth = LocalDate.now().getMonthValue();
+		Month currentMonth = LocalDate.now().getMonth();
 		int currentYear = LocalDate.now().getYear() % 100;
 		List<InlineQueryResultArticle> result = new ArrayList<>();
 		
-		// если нын. месяц года позже сентября, то надо: 22 - 21 - 20, иначе: 21 - 20 - 19
-		if (currentMonth >= 9) {
-			for (int j = currentYear; j >= currentYear - 2; j--) {
-				for (int i = 1; i <= 3; i++) {
-					
-					String text = facultyRusName + " " + i + "-" + j;
+		if (isAfterSeptember(currentMonth)) {
 			
-					InputTextMessageContent inputContent = InputTextMessageContent.builder()
-							.messageText(
-									BotMessages.SUCCESS_APPLY_FACULTY + " " + text)
-							.build();
-			
-					InlineQueryResultArticle article = InlineQueryResultArticle.builder()
-							.title(text)
-							.id(text)
-							.inputMessageContent(inputContent)
-							.build();
-			
-					result.add(article);
-				}
-			}
+			IntStream.of(currentYear, currentYear - 1, currentYear - 2).forEach(year -> {
+				IntStream.of(1, 2, 3).forEach(num -> {
+					buildEsssOrPksOrKsResultArticle(facultyRusName, result, year, num);
+				});
+			});
 			return result;
 		}
-		for (int j = currentYear - 1; j >= currentYear - 3; j--) {
-			for (int i = 1; i <= 3; i++) {
+		
+		IntStream.of(currentYear - 1 , currentYear - 2, currentYear - 3).forEach(year -> {
+			IntStream.of(1, 2, 3).forEach(num -> {
 				
-				String text = facultyRusName + " " + i + "-" + j;
-		
-				InputTextMessageContent inputContent = InputTextMessageContent.builder()
-						.messageText(
-								BotMessages.SUCCESS_APPLY_FACULTY + " " + text)
-						.build();
-		
-				InlineQueryResultArticle article = InlineQueryResultArticle.builder()
-						.title(text)
-						.id(text)
-						.inputMessageContent(inputContent)
-						.build();
-		
-				result.add(article);
-			}
-		}
+				buildEsssOrPksOrKsResultArticle(facultyRusName, result, year, num);
+			});
+		});
 		return result;
+	}
+	
+	private void buildEkssOrSsskResultArticle(String facultyRusName, List<InlineQueryResultArticle> result, int year) {
+		String text = facultyRusName + " 1" + "-" + year;
+
+		InputTextMessageContent inputContent = InputTextMessageContent.builder()
+				.messageText(
+						BotMessages.SUCCESS_APPLY_FACULTY + " " + text)
+				.build();
+
+		InlineQueryResultArticle article = InlineQueryResultArticle.builder()
+				.title(text)
+				.id(text)
+				.inputMessageContent(inputContent)
+				.build();
+
+		result.add(article);
+	}
+	
+	private void buildEsssOrPksOrKsResultArticle(String facultyRusName, List<InlineQueryResultArticle> result, int year, int num) {
+		String text = facultyRusName + " " + num + "-" + year;
+		
+		InputTextMessageContent inputContent = InputTextMessageContent.builder()
+				.messageText(
+						BotMessages.SUCCESS_APPLY_FACULTY + " " + text)
+				.build();
+
+		InlineQueryResultArticle article = InlineQueryResultArticle.builder()
+				.title(text)
+				.id(text)
+				.inputMessageContent(inputContent)
+				.build();
+
+		result.add(article);
+	}
+	
+	private boolean isAfterSeptember(Month currentMonth) {
+		return currentMonth.getValue() >= Month.SEPTEMBER.getValue();
 	}
 }
