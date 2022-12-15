@@ -21,6 +21,9 @@
 
 Ccылка для скачивание: [**тык**](https://github.com/slappidyslap/pc-edu-zamener/releases/tag/v0.1)
 
+## Примечание
+Действительный проект: https://github.com/slappidyslap/pc-edu-helper
+
 ## Отдельное спасибо
 Азиму, который внёс эту идею
 
